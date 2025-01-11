@@ -105,7 +105,7 @@ const Game = () => {
       if (newSocket) newSocket.disconnect();
     };
   }, []);
-
+  
   useEffect(() => {
     const isPlayerTurn = gameState && gameState.currentPlayerIndex === gameState.players.findIndex(p => p.id === socket.id);
     if (isPlayerTurn && !gameState.gameEnded) {

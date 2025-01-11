@@ -11,7 +11,7 @@ function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset,setPlaye
   const scoreboardRef = useRef(null);
   // const [scale, setScale] = useState(1);
   const [isWinner, setIsWinner] = useState();
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(7);
   const [closing, setClosing] = useState(false); // Added closing state
   const [showDetails, setShowDetails] = useState(false); // New state for toggling scoreboard visibility
   const [shouldNavigate, setShouldNavigate] = useState(false);
