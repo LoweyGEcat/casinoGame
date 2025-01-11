@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { isValidMeld} from "@/utils/card-utils";
 import { useSearchParams, useRouter } from 'next/navigation';
 import CircularCountdown from '@/app/components/CircularCountdown';
+import ActionText from '@/app/components/ActionText';
 
 const Game = () => {
   const [gameState, setGameState] = useState(null);
@@ -42,6 +43,8 @@ const Game = () => {
   const [isScoreboardVisible, setIsScoreboardVisible] = useState(false);
   const [paramValue, setParamValue] = useState();
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const [currentAction, setCurrentAction] = useState(null);
+
   const searchParams = useSearchParams();
   const router = useRouter()
 
@@ -80,6 +83,10 @@ const Game = () => {
 
     newSocket.on('game-state', (newGameState) => {
       setGameState(newGameState);
+
+      if(newGameState.lastAction){
+        setCurrentAction(`Players ${newGameState.lastAction.player} ${newGameState.lastAction.type}`);
+      }
     });
 
     newSocket.on('player-left', (data) => {
@@ -479,6 +486,7 @@ const Game = () => {
       )}
 
       <ChatSideBar isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+        {currentAction && <ActionText action={currentAction} />}
     </div>
   );
 };
