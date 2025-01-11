@@ -24,7 +24,7 @@ export function Card({position, border,transformCard,id ,opacityCard, cardSize, 
         setIsPosition(rect.x)
         controls.start({
           x: `calc(${position.x}px - ${rect.x}px)`, 
-          y:  -340, // Upward movement
+          y:  -335, // Upward movement
           rotate: 360,
           scale: [1, 1, 0.8], 
           // opacity: [1, 0], // Fade out Transition

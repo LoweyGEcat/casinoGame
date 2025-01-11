@@ -41,7 +41,6 @@ function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset }) {
         if (prevCount <= 1) {
           clearInterval(timer);
           if (!hasResetRef.current) {
-            console.log("Resetting game");
             hasResetRef.current = true;
             Reset();
             onClose();

@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 function PlayerCardLeft({ isOpen, onClose,playercard }) {
   const playerBackground = ['roundendedBgplayer1.svg', 'roundendedBgplayer2.svg','roundendedBgplayer3.svg']
-  console.log("playerCard", playercard);
   return (
     <AnimatePresence>
       {isOpen && (

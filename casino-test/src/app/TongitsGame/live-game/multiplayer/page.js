@@ -134,6 +134,7 @@ const Game = () => {
 
 // AUTOPLAY START
 const isAnimatingRef = useRef(false);
+const discardTimeoutRef = useRef(null);
 
 const handleAutoPlay = useCallback(() => {
   if (gameState && socket && !isAutoPlaying) {
@@ -177,6 +178,14 @@ const handleAutoPlay = useCallback(() => {
 
   const nextRound = () =>{
     handleAction({ type: 'nextGame' })
+
+    const userWinner = gameState.players
+    .find(p => p.consecutiveWins === 2)
+
+    if(userWinner){
+      router.push('/TongitsGame/Gamebet');
+    }
+
   }
 
   const handleAction = useCallback((action) => {
@@ -299,8 +308,6 @@ const handleAutoPlay = useCallback(() => {
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const isPlayerTurn = gameState.currentPlayerIndex === gameState.players.findIndex(p => p.id === socket.id);
   
-  console.log("Player",isPlayerTurn)
-  console.log(gameState)
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/TableBot.svg')] bg-no-repeat bg-cover bg-center relative">
@@ -481,7 +488,7 @@ const handleAutoPlay = useCallback(() => {
           socketId={socket.id}
           gameState={gameState}
           onClose={() => setIsScoreboardVisible(false)}
-          Reset={() => nextRound()}
+          Reset={nextRound}
         />
       )}
 
