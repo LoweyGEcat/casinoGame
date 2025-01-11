@@ -86,7 +86,7 @@ export function MeldedCards({
   };
 
   return (
-    <div className="fixed inset-0 pointer-events-none">
+    <div className="fixed inset-0 pointer-events-none" key={socket}>
       {players.map((player, absoluteIndex) => {
         const relativeIndex = getRelativePlayerIndex(absoluteIndex);
         const sortedMelds = selectedSapawTarget 

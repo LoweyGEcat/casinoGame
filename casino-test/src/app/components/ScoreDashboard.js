@@ -4,15 +4,18 @@ import { gsap } from "gsap";
 import { motion } from "framer-motion";
 import { Card } from "../TongitsGame/play-bot/Card";
 import Scoreboard from "./Scoreboard";
+import { useRouter } from 'next/navigation';
 
-function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset }) {
+function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset,setPlayersCount }) {
   const hasResetRef = useRef(false);
   const scoreboardRef = useRef(null);
-  const [scale, setScale] = useState(1);
+  // const [scale, setScale] = useState(1);
   const [isWinner, setIsWinner] = useState();
   const [countdown, setCountdown] = useState(10);
   const [closing, setClosing] = useState(false); // Added closing state
   const [showDetails, setShowDetails] = useState(false); // New state for toggling scoreboard visibility
+  const [shouldNavigate, setShouldNavigate] = useState(false);
+  const router = useRouter();
 
   // Animate for pop up
   useEffect(() => {
@@ -42,8 +45,8 @@ function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset }) {
           clearInterval(timer);
           if (!hasResetRef.current) {
             hasResetRef.current = true;
-            Reset();
             onClose();
+            setShouldNavigate(true);
           }
           return 0;
         }
@@ -59,6 +62,20 @@ function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset }) {
   useEffect(() => {
     setClosing(true); // Start the countdown immediately when the component mounts
   }, []);
+
+    useEffect(() => {
+    if (shouldNavigate) {
+      const winners = gameState.players.filter((p) => p.consecutiveWins === 2);
+
+      if (winners.length > 0) {
+        router.push('/TongitsGame/Gamebet');
+        setPlayersCount(0);
+        resetGame()
+      } else {
+        Reset();
+      }
+    }
+  }, [shouldNavigate, gameState, Reset]);
 
   // Handle close and reset the scoreboard with animation
   const handleClose = () => {

@@ -41,7 +41,7 @@ const Game = () => {
   const [discardingIndex, setDiscardingIndex] = useState(null);
   const [isScoreboardVisible, setIsScoreboardVisible] = useState(false);
   const [paramValue, setParamValue] = useState();
-  const [isAutoPlaying, setIsAutoPlaying] = useState(false); // Added state variable
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter()
 
@@ -122,6 +122,7 @@ const Game = () => {
         timerRef.current = null;
       }
       setTimerExpired(false);
+      setTimer(20); // Reset timer when it's not player's turn
     }
 
     return () => {
@@ -130,44 +131,41 @@ const Game = () => {
         timerRef.current = null;
       }
     };
-  }, [gameState, socket]); // Updated dependency array
+  }, [gameState, socket]);
 
-// AUTOPLAY START
-const isAnimatingRef = useRef(false);
-const discardTimeoutRef = useRef(null);
+  const isAnimatingRef = useRef(false);
+  const discardTimeoutRef = useRef(null);
 
-const handleAutoPlay = useCallback(() => {
-  if (gameState && socket && !isAutoPlaying) {
-    setIsAutoPlaying(true);
+  const handleAutoPlay = useCallback(() => {
+    if (gameState && socket && !isAutoPlaying) {
+      setIsAutoPlaying(true);
 
-    // Auto draw from deck
-    socket.emit('player-action', { type: 'draw', fromDeck: true });
+      // Auto draw from deck
+      socket.emit('player-action', { type: 'draw', fromDeck: true });
 
-    setTimeout(() => {
-      const currentPlayerHand = gameState.players.find(p => p.id === socket.id)?.hand;
+      setTimeout(() => {
+        const currentPlayerHand = gameState.players.find(p => p.id === socket.id)?.hand;
 
-      if (currentPlayerHand && currentPlayerHand.length > 0) {
-        const randomIndex = Math.floor(Math.random() * currentPlayerHand.length);
+        if (currentPlayerHand && currentPlayerHand.length > 0) {
+          const randomIndex = Math.floor(Math.random() * currentPlayerHand.length);
 
-        if (!isAnimatingRef.current) {
-          isAnimatingRef.current = true; // Prevent another animation
-          setDiscardingIndex(randomIndex); // Trigger animation
+          if (!isAnimatingRef.current) {
+            isAnimatingRef.current = true;
+            setDiscardingIndex(randomIndex);
 
-          discardTimeoutRef.current = setTimeout(() => {
-            socket.emit('player-action', { type: 'discard', cardIndex: randomIndex });
-            setDiscardingIndex(null); // Reset animation state
-            isAnimatingRef.current = false; // Allow next animation
-            setIsAutoPlaying(false);
-          }, 400);
+            discardTimeoutRef.current = setTimeout(() => {
+              socket.emit('player-action', { type: 'discard', cardIndex: randomIndex });
+              setDiscardingIndex(null);
+              isAnimatingRef.current = false;
+              setIsAutoPlaying(false);
+            }, 400);
+          }
+        } else {
+          setIsAutoPlaying(false);
         }
-      } else {
-        setIsAutoPlaying(false);
-      }
-    }, 1000);
-  }
-}, [gameState, socket, isAutoPlaying]);
-
-// AUTOMPLAY END
+      }, 1000);
+    }
+  }, [gameState, socket, isAutoPlaying]);
 
   const handleJoinGame = (e) => {
     e.preventDefault();
@@ -176,17 +174,9 @@ const handleAutoPlay = useCallback(() => {
     }
   };
 
-  const nextRound = () =>{
-    handleAction({ type: 'nextGame' })
-
-    const userWinner = gameState.players
-    .find(p => p.consecutiveWins === 2)
-
-    if(userWinner){
-      router.push('/TongitsGame/Gamebet');
-    }
-
-  }
+  const nextRound = () => {
+    handleAction({ type: 'nextGame' });
+  };
 
   const handleAction = useCallback((action) => {
     if (gameState && socket) {
@@ -196,15 +186,9 @@ const handleAutoPlay = useCallback(() => {
           socket.emit('player-action', action);
           setSelectedIndices([]);
           setDiscardingIndex(null);
-          // Reset timer when the turn changes
-          setTimer(20);
         }, 300);
       } else {
         socket.emit('player-action', action);
-        if (action.type === 'draw') {
-          // Reset timer when drawing a card (turn starts)
-          setTimer(20);
-        }
       }
     }
   }, [gameState, socket, selectedIndices]);
@@ -489,6 +473,8 @@ const handleAutoPlay = useCallback(() => {
           gameState={gameState}
           onClose={() => setIsScoreboardVisible(false)}
           Reset={nextRound}
+          resetGame={() => handleAction({ type: 'resetGame' })}
+          setPlayersCount={setPlayersCount}
         />
       )}
 
@@ -498,5 +484,4 @@ const handleAutoPlay = useCallback(() => {
 };
 
 export default Game;
-
 
