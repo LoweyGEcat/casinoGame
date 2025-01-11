@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Jaro:wght@400;600;700;800;900;1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jaini+Purva:wght@400;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.snowflake {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+    pointer-events: none;
+    }
+  
+.landing{
+    font-family: 'Jaro', sans-serif;
+    font-size: 40px;
+    height: 15rem;
+}
+
+.landing h3{
+    font-family: 'Jaro', sans-serif;
+    font-size: 40px;
+} 
+
+.svg-bold-stroke path {
+    stroke-width: 2; /* Adjust the value for a bolder stroke */
+  }
+.wood p{ 
+    color: white;
+    font-family: 'Jaro', sans-serif;
+    font-size: 20px;
+}
+
+.landing button{
+    width: 13rem;
+    height: 10rem;
+    padding: 10px;
+}
+.landing button p{
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.loadingLogo{
+    width: 500px !important;
+    width: 500px !important;
+}
+
+.octagon {
+    clip-path: polygon(
+      30% 0%, 
+      70% 0%, 
+      100% 30%, 
+      100% 70%, 
+      70% 100%, 
+      30% 100%, 
+      0% 70%, 
+      0% 30%
+    );
+  }
+
+
+  @keyframes slowHighBounce {
+    0%, 100% {
+      transform: translateY(-10px);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+    50% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+  
+  .slow-high-bounce {
+    animation: slowHighBounce 2s infinite;
+  }
+  
