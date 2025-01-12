@@ -3,7 +3,7 @@ import { motion, useAnimation } from 'framer-motion';
 import { Player } from '../../../hooks/use-tongit-game';
 import { Card as CardType } from '../../../utils/card-utils';
 
-export function Card({position, border,transformCard,id ,opacityCard, cardSize, card, onClick, small = false,isDiscarding}) {
+export function Card({contextText, position, border,transformCard,id ,opacityCard, cardSize, card, onClick, small = false,isDiscarding}) {
   const { suit, rank } = card;
   const boxRef = useRef(null)
   const [isPosition, setIsPosition] = useState()
@@ -24,7 +24,7 @@ export function Card({position, border,transformCard,id ,opacityCard, cardSize, 
         setIsPosition(rect.x)
         controls.start({
           x: `calc(${position.x}px - ${rect.x}px)`, 
-          y:  -335, // Upward movement
+          y:  -370, // Upward movement
           rotate: 360,
           scale: [1, 1, 0.8], 
           // opacity: [1, 0], // Fade out Transition
@@ -63,7 +63,7 @@ export function Card({position, border,transformCard,id ,opacityCard, cardSize, 
     ref={boxRef} 
   >
     <div className="text-left font-bold text-2xl">{rank}</div>
-    <div className="text-center text-4xl 2xl:text-4xl">
+    <div className={`text-center ${contextText ? contextText : "text-4xl" }  2xl:text-4xl`}>
       {getSuitSymbol(suit)}
     </div>
   </div></motion.div> 

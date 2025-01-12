@@ -6,6 +6,7 @@ import { Card as CardType } from "../../../utils/card-utils";
 import PlayerIcon from "@/app/components/PlayerIcon";
 
 export function MeldedCards({
+  contextText,
   gameState,
   socket,
   players,
@@ -61,11 +62,11 @@ export function MeldedCards({
   const getPositioningClass = (relativeIndex) => {
     switch (relativeIndex) {
       case 0:
-        return "bottom-72 left-96 right-96 -translate-x-1/2 z-10";
+        return "bottom-64 left-96 right-96 -translate-x-1/2 z-10";
       case 1:
         return "top-44 2xl:top-72 right-64 2xl:right-96 z-10";
       case 2:
-        return "top-44 2xl:top-72 left-72 2xl:left-96 z-10";
+        return "top-44 2xl:top-72 left-72 2xl:left-96 z-10 pl-3";
       default:
         return "";
     }
@@ -147,6 +148,7 @@ export function MeldedCards({
                             className="transform scale-75 origin-top-left cursor-pointer rounded-md"
                           >
                             <Card
+                              contextText={contextText}
                               border={`1px solid black`}
                               transformCard={`perspective(500px) rotateX(40deg)`}
                               cardSize={"w-14 h-auto p-1 text-xl 2xl:text-lg"}

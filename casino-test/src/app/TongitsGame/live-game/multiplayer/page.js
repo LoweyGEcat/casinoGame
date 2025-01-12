@@ -298,8 +298,6 @@ const Game = () => {
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const isPlayerTurn = gameState.currentPlayerIndex === gameState.players.findIndex(p => p.id === socket.id);
-  
-
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/TableBot.svg')] bg-no-repeat bg-cover bg-center relative">
       <div className="absolute w-screen h-16 top-0 bg-custom-gradient">
@@ -332,6 +330,7 @@ const Game = () => {
         <div className="w-full flex flex-col justify-between items-center gap-10">
           <div className='absolute z-10'>
             <MeldedCards
+              contextText={`text-3xl`}
               gameState={gameState}
               socket={socket.id}
               players={gameState.players}
@@ -343,7 +342,7 @@ const Game = () => {
             />
           </div>
 
-          <div className="p-4 2xl:px-8 rounded-md flex justify-center space-x-2 mb-10 mt-3 relative">
+          <div className="p-4 2xl:px-8 rounded-md flex justify-center space-x-2 mb-10 mt-10 relative">
             <Deck
               cardsLeft={gameState.deck.length}
               onDraw={() => isPlayerTurn && !gameState.gameEnded && handleAction({ type: 'draw', fromDeck: true })}
@@ -383,7 +382,7 @@ const Game = () => {
             </button>
           </div>
 
-          <div className="pb-14 pr-20 2xl:py-24 2xl:pr-0">
+          <div className="pb-6 mt-10 pr-20 2xl:py-24 2xl:pr-0 ">
             <PlayerHand
               position={position}
               cardSize={" w-1.5 h-22 p-2 text-4xl"}
