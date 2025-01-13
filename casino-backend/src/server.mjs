@@ -18,6 +18,21 @@ const io = new Server(httpServer, {
 const games = new Map();
 const PLAYERS_REQUIRED = 3;
 
+function startTimer(game) {
+  if (game.timerInterval) {
+    clearInterval(game.timerInterval);
+  }
+  game.timer = 20;
+  game.timerInterval = setInterval(() => {
+    game.timer--;
+    io.to(game.id).emit('timer-update', game.timer);
+    if (game.timer === 0) {
+      clearInterval(game.timerInterval);
+      game.timerInterval = null;
+      handleAutoPlay(game); // Function to handle automatic play when timer runs out
+    }
+  }, 1000);
+}
 
 // GAME SET UP 
 io.on('connection', (socket) => {
@@ -438,28 +453,6 @@ function handleResetGame(game) {
   });
   handleNextGame(game);
 }
-
-// function botTurn(game) {
-//   const bot = game.players[game.currentPlayerIndex];
-//   if (!bot.isBot) return;
-
-//   // Bot logic here
-//   // For now, let's implement a simple strategy: draw a card and discard a random card
-
-//   // Draw a card
-//   handleDraw(game, true);
-
-//   // Discard a random card
-//   const randomCardIndex = Math.floor(Math.random() * bot.hand.length);
-//   handleDiscard(game, randomCardIndex);
-
-//   io.to(game.id).emit('game-state', game);
-
-//   // Check if it's another bot's turn
-//   if (!game.gameEnded && game.players[game.currentPlayerIndex].isBot) {
-//     setTimeout(() => botTurn(game), 1000);
-//   }
-// }
 
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {

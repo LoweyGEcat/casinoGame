@@ -44,7 +44,7 @@ const Game = () => {
   const [paramValue, setParamValue] = useState();
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [currentAction, setCurrentAction] = useState(null);
-
+  const [gameStarted, setGameStarted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter()
 
@@ -77,8 +77,11 @@ const Game = () => {
 
     newSocket.on('game-started', () => {
       setIsWaiting(false);
-      setIsDealingDone(false);
-      setTimeout(() => setIsDealingDone(true), 2000);
+      setGameStarted(true);
+      if (!isDealingDone) {
+        setIsDealingDone(false);
+        setTimeout(() => setIsDealingDone(true), 2000);
+      }
     });
 
     newSocket.on('game-state', (newGameState) => {
@@ -278,7 +281,7 @@ const Game = () => {
     );
   }
 
-  if (isWaiting) {
+  if (isWaiting && playersCount < 3) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-lg text-center">
@@ -290,7 +293,7 @@ const Game = () => {
     );
   }
 
-  if (!isDealingDone) {
+  if (gameStarted && !isDealingDone) {
     return (
       <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/TableBot.svg')] bg-no-repeat bg-cover bg-center relative">
         <DealingAnimation onComplete={() => setIsDealingDone(true)} />
@@ -301,6 +304,19 @@ const Game = () => {
   const DiscardPileModal = () => {
     setIsDiscardPileOpen(!isDiscardPileOpen);
   };
+
+  const resetGame = () => {
+    handleAction({ type: 'resetGame' })
+    const value = searchParams.get('betAmount');
+    if(!value){
+      router.push('/TongitsGame/Gamebet');
+    }
+    setParamValue(value);
+    setIsWaiting(true);
+    setIsDealingDone(false)
+    setGameState(null)
+    
+  }
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const playerIndex = gameState.players.findIndex(p => p.id === socket.id);
@@ -489,7 +505,7 @@ const Game = () => {
           gameState={gameState}
           onClose={() => setIsScoreboardVisible(false)}
           Reset={nextRound}
-          resetGame={() => handleAction({ type: 'resetGame' })}
+          resetGame={() => resetGame()}
           setPlayersCount={setPlayersCount}
         />
       )}
