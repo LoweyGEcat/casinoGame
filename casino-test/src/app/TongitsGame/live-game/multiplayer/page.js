@@ -194,6 +194,12 @@ const Game = () => {
           setSelectedIndices([]);
           setDiscardingIndex(null);
         }, 300);
+      } else if (action.type === 'shuffle') {
+        // Emit the shuffle action with the current player's index
+        socket.emit('player-action', { 
+          type: 'shuffle', 
+          playerIndex: gameState.players.findIndex(p => p.id === socket.id) 
+        });
       } else {
         socket.emit('player-action', action);
       }
@@ -297,6 +303,9 @@ const Game = () => {
   };
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  const playerIndex = gameState.players.findIndex(p => p.id === socket.id);
+  const player = gameState.players[playerIndex];
+  console.log(gameState);
   const isPlayerTurn = gameState.currentPlayerIndex === gameState.players.findIndex(p => p.id === socket.id);
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/TableBot.svg')] bg-no-repeat bg-cover bg-center relative">
@@ -434,6 +443,7 @@ const Game = () => {
       </div>
 
       <GameFooter
+        onShuffle={() => handleAction({ type: 'shuffle'})}
         onMeld={() => {
           if (isPlayerTurn && selectedIndices.length >= 3 && !gameState.gameEnded) {
             handleAction({ type: 'meld', cardIndices: selectedIndices });
