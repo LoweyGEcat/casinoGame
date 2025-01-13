@@ -97,15 +97,16 @@ function TogitsGame() {
               >
                 <div className="w-auto">
                 <h3 className="bg-clip-text text-transparent bg-text-gradient text-4xl font-bold">Choose Your Game Mode</h3>
-                <div className="flex flex-row gap-5 justify-between ">
-                  <div>
+                <div className="flex flex-row gap-5 justify-center ">
+                  {/* Remove bot Botton */}
+                  {/* <div>
                     <button className="bg-[url('/image/playbotButton.svg')]  bg-no-repeat bg-cover bg-center" onClick={handleButtonClick}>
                     <p    className="text-4xl font-bold tracking-tight text-transparent text-stroke text-white">Play with bot</p>
                     </button>
-                  </div>
+                  </div> */}
                   <div>
                   <button className="bg-[url('/image/playbotButton.svg')]  bg-no-repeat bg-cover bg-center" onClick={handleButtonClickLive}>
-                    <p    className="text-4xl font-bold tracking-tight text-transparent text-stroke text-white">Live Game</p>
+                    <p    className="text-4xl font-bold tracking-tight text-transparent text-stroke text-white">Start Game</p>
                     </button>
                   </div>
                 </div>
