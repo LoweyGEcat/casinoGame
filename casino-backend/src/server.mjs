@@ -40,7 +40,8 @@ io.on('connection', (socket) => {
         gameEnded: false,
         selectedCardIndices: [],
         gameStarted: false,
-        firstPlayerHasPlayed: false
+        firstPlayerHasPlayed: false,
+        lastAction: null,
       };
       games.set(game.id, game);
     }
@@ -131,15 +132,21 @@ function startGame(game) {
   game.hasDrawnThisTurn = true; // Set to true for the first player
   game.selectedCardIndices = [];
   game.firstPlayerHasPlayed = false;
+  let playername = ''
 
   game.players.forEach((player, index) => {
     player.hand = hands[index];
-    if (index === 0) {
-      // Give the first player an extra card
-      player.hand.push(game.deck.pop());
+
+    if(player.consecutiveWins === 1 || index === 0) {
+          // Give the first player an extra card
+          playername = player.name
+          player.hand.push(game.deck.pop());
     }
+
     player.exposedMelds = [];
   });
+
+  game.lastAction = {player: playername , type: 'Game Started'};
 
   io.to(game.id).emit('game-started', game);
   io.to(game.id).emit('game-state', game);
@@ -152,45 +159,60 @@ function startGame(game) {
 
 // HANDLE PLAYER ACTION
 function handlePlayerAction(game, action, playerIndex) {
-  // Prevent the first player from drawing on their first turn
-  if (playerIndex === 0 && !game.firstPlayerHasPlayed && action.type === 'draw') {
-    return;
-  }
+  const player = game.players[playerIndex];
+  const playerName = player.name;
+
+  // FOR NEXT GAME BASE ON THE COSECUTIVE WINS
+  const playerWinName = game.players.find(p => p.consecutiveWins === 1);
 
   switch (action.type) {
     case 'draw':
       handleDraw(game, action.fromDeck, action.meldIndices);
+      game.lastAction = { player: playerName, type: action.fromDeck ? 'drew from deck' : 'drew from discard pile' };
       break;
     case 'discard':
       handleDiscard(game, action.cardIndex);
-      if (playerIndex === 0 && !game.firstPlayerHasPlayed) {
-        game.firstPlayerHasPlayed = true;
-      }
+      game.lastAction = { player: playerName, type: 'discarded a card' };
       break;
     case 'meld':
       handleMeld(game, action.cardIndices);
+      game.lastAction = { player: playerName, type: 'melded cards' };
       break;
     case 'sapaw':
       handleSapaw(game, action.target.playerIndex, action.target.meldIndex, action.cardIndices);
+      game.lastAction = { player: playerName, type: 'performed a sapaw' };
       break;
     case 'callDraw':
       handleCallDraw(game);
+      game.lastAction = { player: playerName, type: 'called a draw' };
       break;
     case 'updateSelectedIndices':
       game.selectedCardIndices = action.indices;
+      // Don't update lastAction for this internal action
       break;
     case 'autoSort':
       handleAutoSort(game, playerIndex);
+      game.lastAction = { player: playerName, type: 'sorted their hand' };
       break;
     case 'shuffle':
       handleShuffle(game, playerIndex);
+      game.lastAction = { player: playerName, type: 'shuffled their hand' };
       break;
     case 'nextGame':
       handleNextGame(game);
+      game.lastAction = { player: playerWinName.name , type: 'started a new game' };
       break;
     case 'resetGame':
       handleResetGame(game);
+      game.lastAction = { player: playerName, type: 'reset the game' };
       break;
+  }
+
+  // Emit the updated game state after each action
+  io.to(game.id).emit('game-state', game);
+
+  if (playerIndex === 0 && !game.firstPlayerHasPlayed && action.type !== 'draw') {
+    game.firstPlayerHasPlayed = true;
   }
 }
 
@@ -340,6 +362,7 @@ function handleTongits(game) {
 
   game.winner = currentPlayer;
   game.gameEnded = true;
+  game.lastAction = { player: game.currentPlayerIndex, type: 'Achieved Tongits!' };
 }
 
 // SORT A CARD
@@ -367,6 +390,9 @@ function handleNextGame(game) {
   // Preserve consecutive wins from previous round
   const preservedConsecutiveWins = game.players.map(player => player.consecutiveWins || 0);
 
+  // Find the winner from the previous game
+  const winnerIndex = preservedConsecutiveWins.indexOf(Math.max(...preservedConsecutiveWins));
+
   // Start the next round
   game.round++;
   game.deck = createDeck(); // Generate a new deck
@@ -374,7 +400,7 @@ function handleNextGame(game) {
   game.deck = remainingDeck;
   game.deckEmpty = false;
   game.discardPile = [];
-  game.currentPlayerIndex = 0;
+  game.currentPlayerIndex = winnerIndex; // Set the winner as the starting player
   game.hasDrawnThisTurn = true; // Set to true for the first player
   game.gameEnded = false;
   game.selectedCardIndices = [];
@@ -393,13 +419,13 @@ function handleNextGame(game) {
     turnsPlayed: 0,
   }));
 
-  // Give the first player an extra card
-  game.players[0].hand.push(game.deck.pop());
-
+  // Give the winner an extra card
+  game.players[winnerIndex].hand.push(game.deck.pop());
+  game.lastAction = { player: game.players[winnerIndex].name, type: 'Next Game started' };
   io.to(game.id).emit('game-state', game);
 
   // If the first player is a bot, start its turn
-  if (game.players[0].isBot) {
+  if (game.players[winnerIndex].isBot) {
     setTimeout(() => botTurn(game), 1000);
   }
 }
@@ -434,6 +460,7 @@ function handleResetGame(game) {
 //     setTimeout(() => botTurn(game), 1000);
 //   }
 // }
+
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

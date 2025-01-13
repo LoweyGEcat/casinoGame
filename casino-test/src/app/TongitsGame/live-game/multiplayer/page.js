@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { isValidMeld} from "@/utils/card-utils";
 import { useSearchParams, useRouter } from 'next/navigation';
 import CircularCountdown from '@/app/components/CircularCountdown';
+import ActionText from '@/app/components/ActionText';
 
 const Game = () => {
   const [gameState, setGameState] = useState(null);
@@ -41,7 +42,9 @@ const Game = () => {
   const [discardingIndex, setDiscardingIndex] = useState(null);
   const [isScoreboardVisible, setIsScoreboardVisible] = useState(false);
   const [paramValue, setParamValue] = useState();
-  const [isAutoPlaying, setIsAutoPlaying] = useState(false); // Added state variable
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const [currentAction, setCurrentAction] = useState(null);
+
   const searchParams = useSearchParams();
   const router = useRouter()
 
@@ -80,6 +83,10 @@ const Game = () => {
 
     newSocket.on('game-state', (newGameState) => {
       setGameState(newGameState);
+
+      if(newGameState.lastAction){
+        setCurrentAction(`Players ${newGameState.lastAction.player} ${newGameState.lastAction.type}`);
+      }
     });
 
     newSocket.on('player-left', (data) => {
@@ -98,7 +105,7 @@ const Game = () => {
       if (newSocket) newSocket.disconnect();
     };
   }, []);
-
+  
   useEffect(() => {
     const isPlayerTurn = gameState && gameState.currentPlayerIndex === gameState.players.findIndex(p => p.id === socket.id);
     if (isPlayerTurn && !gameState.gameEnded) {
@@ -122,6 +129,7 @@ const Game = () => {
         timerRef.current = null;
       }
       setTimerExpired(false);
+      setTimer(20); // Reset timer when it's not player's turn
     }
 
     return () => {
@@ -130,43 +138,41 @@ const Game = () => {
         timerRef.current = null;
       }
     };
-  }, [gameState, socket]); // Updated dependency array
+  }, [gameState, socket]);
 
-// AUTOPLAY START
-const isAnimatingRef = useRef(false);
+  const isAnimatingRef = useRef(false);
+  const discardTimeoutRef = useRef(null);
 
-const handleAutoPlay = useCallback(() => {
-  if (gameState && socket && !isAutoPlaying) {
-    setIsAutoPlaying(true);
+  const handleAutoPlay = useCallback(() => {
+    if (gameState && socket && !isAutoPlaying) {
+      setIsAutoPlaying(true);
 
-    // Auto draw from deck
-    socket.emit('player-action', { type: 'draw', fromDeck: true });
+      // Auto draw from deck
+      socket.emit('player-action', { type: 'draw', fromDeck: true });
 
-    setTimeout(() => {
-      const currentPlayerHand = gameState.players.find(p => p.id === socket.id)?.hand;
+      setTimeout(() => {
+        const currentPlayerHand = gameState.players.find(p => p.id === socket.id)?.hand;
 
-      if (currentPlayerHand && currentPlayerHand.length > 0) {
-        const randomIndex = Math.floor(Math.random() * currentPlayerHand.length);
+        if (currentPlayerHand && currentPlayerHand.length > 0) {
+          const randomIndex = Math.floor(Math.random() * currentPlayerHand.length);
 
-        if (!isAnimatingRef.current) {
-          isAnimatingRef.current = true; // Prevent another animation
-          setDiscardingIndex(randomIndex); // Trigger animation
+          if (!isAnimatingRef.current) {
+            isAnimatingRef.current = true;
+            setDiscardingIndex(randomIndex);
 
-          discardTimeoutRef.current = setTimeout(() => {
-            socket.emit('player-action', { type: 'discard', cardIndex: randomIndex });
-            setDiscardingIndex(null); // Reset animation state
-            isAnimatingRef.current = false; // Allow next animation
-            setIsAutoPlaying(false);
-          }, 400);
+            discardTimeoutRef.current = setTimeout(() => {
+              socket.emit('player-action', { type: 'discard', cardIndex: randomIndex });
+              setDiscardingIndex(null);
+              isAnimatingRef.current = false;
+              setIsAutoPlaying(false);
+            }, 400);
+          }
+        } else {
+          setIsAutoPlaying(false);
         }
-      } else {
-        setIsAutoPlaying(false);
-      }
-    }, 1000);
-  }
-}, [gameState, socket, isAutoPlaying]);
-
-// AUTOMPLAY END
+      }, 500);
+    }
+  }, [gameState, socket, isAutoPlaying]);
 
   const handleJoinGame = (e) => {
     e.preventDefault();
@@ -175,9 +181,9 @@ const handleAutoPlay = useCallback(() => {
     }
   };
 
-  const nextRound = () =>{
-    handleAction({ type: 'nextGame' })
-  }
+  const nextRound = () => {
+    handleAction({ type: 'nextGame' });
+  };
 
   const handleAction = useCallback((action) => {
     if (gameState && socket) {
@@ -187,15 +193,15 @@ const handleAutoPlay = useCallback(() => {
           socket.emit('player-action', action);
           setSelectedIndices([]);
           setDiscardingIndex(null);
-          // Reset timer when the turn changes
-          setTimer(20);
         }, 300);
+      } else if (action.type === 'shuffle') {
+        // Emit the shuffle action with the current player's index
+        socket.emit('player-action', { 
+          type: 'shuffle', 
+          playerIndex: gameState.players.findIndex(p => p.id === socket.id) 
+        });
       } else {
         socket.emit('player-action', action);
-        if (action.type === 'draw') {
-          // Reset timer when drawing a card (turn starts)
-          setTimer(20);
-        }
       }
     }
   }, [gameState, socket, selectedIndices]);
@@ -297,11 +303,10 @@ const handleAutoPlay = useCallback(() => {
   };
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  const playerIndex = gameState.players.findIndex(p => p.id === socket.id);
+  const player = gameState.players[playerIndex];
+  console.log(gameState);
   const isPlayerTurn = gameState.currentPlayerIndex === gameState.players.findIndex(p => p.id === socket.id);
-  
-  console.log("Player",isPlayerTurn)
-  console.log(gameState)
-
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/TableBot.svg')] bg-no-repeat bg-cover bg-center relative">
       <div className="absolute w-screen h-16 top-0 bg-custom-gradient">
@@ -334,6 +339,7 @@ const handleAutoPlay = useCallback(() => {
         <div className="w-full flex flex-col justify-between items-center gap-10">
           <div className='absolute z-10'>
             <MeldedCards
+              contextText={`text-3xl`}
               gameState={gameState}
               socket={socket.id}
               players={gameState.players}
@@ -345,7 +351,7 @@ const handleAutoPlay = useCallback(() => {
             />
           </div>
 
-          <div className="p-4 2xl:px-8 rounded-md flex justify-center space-x-2 mb-10 mt-3 relative">
+          <div className="p-4 2xl:px-8 rounded-md flex justify-center space-x-2 mb-10 mt-10 relative">
             <Deck
               cardsLeft={gameState.deck.length}
               onDraw={() => isPlayerTurn && !gameState.gameEnded && handleAction({ type: 'draw', fromDeck: true })}
@@ -385,7 +391,7 @@ const handleAutoPlay = useCallback(() => {
             </button>
           </div>
 
-          <div className="pb-14 pr-20 2xl:py-24 2xl:pr-0">
+          <div className="pb-6 mt-10 pr-20 2xl:py-24 2xl:pr-0 ">
             <PlayerHand
               position={position}
               cardSize={" w-1.5 h-22 p-2 text-4xl"}
@@ -429,7 +435,7 @@ const handleAutoPlay = useCallback(() => {
         </button>
       </div>
 
-      <div className="absolute left-5 bottom-64">
+      <div className="absolute left-5 bottom-56">
         <GameRound gameState={gameState} />
         <div className={`absolute top-16 left-1/2 transform -translate-x-1/2  w-14 h-14 flex justify-center items-center p-2`}>
         <CircularCountdown timer={timer} gameState={gameState} isPlayerTurn={isPlayerTurn} />
@@ -437,6 +443,7 @@ const handleAutoPlay = useCallback(() => {
       </div>
 
       <GameFooter
+        onShuffle={() => handleAction({ type: 'shuffle'})}
         onMeld={() => {
           if (isPlayerTurn && selectedIndices.length >= 3 && !gameState.gameEnded) {
             handleAction({ type: 'meld', cardIndices: selectedIndices });
@@ -481,15 +488,17 @@ const handleAutoPlay = useCallback(() => {
           socketId={socket.id}
           gameState={gameState}
           onClose={() => setIsScoreboardVisible(false)}
-          Reset={() => nextRound()}
+          Reset={nextRound}
+          resetGame={() => handleAction({ type: 'resetGame' })}
+          setPlayersCount={setPlayersCount}
         />
       )}
 
       <ChatSideBar isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+        {currentAction && <ActionText action={currentAction} />}
     </div>
   );
 };
 
 export default Game;
-
 

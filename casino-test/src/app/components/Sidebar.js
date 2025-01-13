@@ -21,7 +21,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
 
   const handleButtonClick = () => {
-    router.push("/TongitsGame");
+    router.push('/TongitsGame/Gamebet');
   };
 
   
@@ -114,8 +114,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                             Settings
                           </button>
                         </div>
-                        <div  className=" border-gray-500 border-b p-2  hover:bg-[rgba(124,85,75,0.2)]">
-                          <button className="font-jaro text-white font-extrabold text-2xl" onClick={handleButtonClick}>
+                        <div  className=" border-gray-500 border-b p-2  cursor-pointer hover:bg-[rgba(124,85,75,0.2)]" onClick={handleButtonClick}>
+                          <button className="font-jaro text-white font-extrabold text-2xl">
                             Quit
                           </button>
                         </div>

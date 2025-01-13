@@ -23,7 +23,6 @@ export function DiscardPile({
     }
   }, [setPosition]);
 
-  console.log("topCard", onDraw);
 
 
   if (!topCard) {
