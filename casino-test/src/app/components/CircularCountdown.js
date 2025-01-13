@@ -13,7 +13,7 @@ function CircularCountdown({ isPlayerTurn, gameState, timer }) {
 
   return (
     isPlayerTurn && !gameState.gameEnded && (
-      <div className="absolute top-20 left-1/2 transform -translate-x-1/2">
+      <div className="absolute top-14 left-1/2 transform -translate-x-1/2">
         <svg
           className={`w-24 h-24 ${timer >= 10 ? "" : "animate-pulse"}`} // Increased width and height
           width="120" // Size of the container to fit the full circle

@@ -170,7 +170,7 @@ const Game = () => {
         } else {
           setIsAutoPlaying(false);
         }
-      }, 1000);
+      }, 500);
     }
   }, [gameState, socket, isAutoPlaying]);
 
@@ -435,7 +435,7 @@ const Game = () => {
         </button>
       </div>
 
-      <div className="absolute left-5 bottom-64">
+      <div className="absolute left-5 bottom-56">
         <GameRound gameState={gameState} />
         <div className={`absolute top-16 left-1/2 transform -translate-x-1/2  w-14 h-14 flex justify-center items-center p-2`}>
         <CircularCountdown timer={timer} gameState={gameState} isPlayerTurn={isPlayerTurn} />
