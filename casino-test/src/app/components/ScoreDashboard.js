@@ -68,8 +68,6 @@ function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset,setPlaye
       const winners = gameState.players.filter((p) => p.consecutiveWins === 2);
 
       if (winners.length > 0) {
-        router.push('/TongitsGame/Gamebet');
-        setPlayersCount(0);
         resetGame()
       } else {
         Reset();
