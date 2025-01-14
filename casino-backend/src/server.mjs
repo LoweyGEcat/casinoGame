@@ -8,33 +8,63 @@ const app = express();
 app.use(cors());
 
 const httpServer = createServer(app);
+
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
-  }
+  },
+  maxHttpBufferSize: 1e8,
+  transports: ['websocket', 'polling'],
+  allowEIO3: true
 });
 
 const games = new Map();
 const PLAYERS_REQUIRED = 3;
 
-function startTimer(game) {
-  if (game.timerInterval) {
-    clearInterval(game.timerInterval);
-  }
-  game.timer = 20;
-  game.timerInterval = setInterval(() => {
-    game.timer--;
-    io.to(game.id).emit('timer-update', game.timer);
-    if (game.timer === 0) {
-      clearInterval(game.timerInterval);
-      game.timerInterval = null;
-      handleAutoPlay(game); // Function to handle automatic play when timer runs out
-    }
-  }, 1000);
+function sanitizeGameState(game) {
+  return {
+    id: game.id,
+    players: game.players.map(player => ({
+      id: player.id,
+      name: player.name,
+      playerNumber: player.playerNumber,
+      hand: player.hand,
+      exposedMelds: player.exposedMelds,
+      secretMelds: player.secretMelds,
+      score: player.score,
+      consecutiveWins: player.consecutiveWins,
+      isSapawed: player.isSapawed,
+      points: player.points,
+      turnsPlayed: player.turnsPlayed,
+      isBot: player.isBot,
+      // Add this flag to identify if the player is the fight initiator
+      isFightInitiator: game.fightInitiator !== null && game.fightInitiator === game.players.indexOf(player)
+    })),
+    deck: game.deck,
+    deckEmpty: game.deckEmpty,
+    discardPile: game.discardPile,
+    currentPlayerIndex: game.currentPlayerIndex,
+    hasDrawnThisTurn: game.hasDrawnThisTurn,
+    round: game.round,
+    entryFee: game.entryFee,
+    gameEnded: game.gameEnded,
+    selectedCardIndices: game.selectedCardIndices,
+    gameStarted: game.gameStarted,
+    firstPlayerHasPlayed: game.firstPlayerHasPlayed,
+    lastAction: game.lastAction,
+    fightInitiator: game.fightInitiator,
+    fightResponses: game.fightResponses,
+    challengeInitiator: game.challengeInitiator,
+    challengeTarget: game.challengeTarget,
+    challengeResponses: game.challengeResponses,
+    winner: game.winner ? {
+      id: game.winner.id,
+      name: game.winner.name
+    } : null
+  };
 }
 
-// GAME SET UP 
 io.on('connection', (socket) => {
   console.log(`New connection: ${socket.id}`);
 
@@ -46,7 +76,7 @@ io.on('connection', (socket) => {
         id: Date.now().toString(),
         players: [],
         deck: [],
-        deckEmpty:false,
+        deckEmpty: false,
         discardPile: [],
         currentPlayerIndex: 0,
         hasDrawnThisTurn: false,
@@ -57,6 +87,12 @@ io.on('connection', (socket) => {
         gameStarted: false,
         firstPlayerHasPlayed: false,
         lastAction: null,
+        fightInitiator: null,
+        fightResponses: [],
+        challengeInitiator: null,
+        challengeTarget: null,
+        challengeResponses: [],
+        fightTimeout: null
       };
       games.set(game.id, game);
     }
@@ -86,12 +122,12 @@ io.on('connection', (socket) => {
       playersCount: game.players.length
     });
 
+    io.to(game.id).emit('game-state', sanitizeGameState(game));
+
     if (game.players.length === PLAYERS_REQUIRED && !game.gameStarted) {
       game.gameStarted = true;
       setTimeout(() => startGame(game), 1000);
     }
-
-    io.to(game.id).emit('game-state', game);
   });
 
   socket.on('player-action', (action) => {
@@ -102,12 +138,11 @@ io.on('connection', (socket) => {
     if (!game) return;
 
     const playerIndex = game.players.findIndex(p => p.id === socket.id);
-    if (playerIndex !== game.currentPlayerIndex) return;
+    if (playerIndex !== game.currentPlayerIndex && !['fight-response', 'challenge-response'].includes(action.type)) return;
 
     handlePlayerAction(game, action, playerIndex);
-    io.to(game.id).emit('game-state', game);
+    io.to(game.id).emit('game-state', sanitizeGameState(game));
 
-    // Check if it's a bot's turn after the human player's action
     if (!game.gameEnded && game.players[game.currentPlayerIndex].isBot) {
       setTimeout(() => botTurn(game), 1000);
     }
@@ -128,7 +163,7 @@ io.on('connection', (socket) => {
             playerNumber: player.playerNumber,
             playersCount: game.players.length
           });
-          io.to(gameId).emit('game-state', game);
+          io.to(gameId).emit('game-state', sanitizeGameState(game));
         }
         break;
       }
@@ -136,7 +171,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// GAME START
 function startGame(game) {
   if (game.players.length !== PLAYERS_REQUIRED) return;
 
@@ -144,40 +178,34 @@ function startGame(game) {
   const { hands, remainingDeck } = dealCards(game.deck, PLAYERS_REQUIRED, 12);
   game.deck = remainingDeck;
   game.discardPile = [];
-  game.hasDrawnThisTurn = true; // Set to true for the first player
+  game.hasDrawnThisTurn = true;
   game.selectedCardIndices = [];
   game.firstPlayerHasPlayed = false;
-  let playername = ''
+  let playername = '';
 
   game.players.forEach((player, index) => {
     player.hand = hands[index];
-
     if(player.consecutiveWins === 1 || index === 0) {
-          // Give the first player an extra card
-          playername = player.name
-          player.hand.push(game.deck.pop());
+      playername = player.name;
+      player.hand.push(game.deck.pop());
     }
-
     player.exposedMelds = [];
   });
 
-  game.lastAction = {player: playername , type: 'Game Started'};
+  game.lastAction = {player: playername, type: 'Game Started'};
 
-  io.to(game.id).emit('game-started', game);
-  io.to(game.id).emit('game-state', game);
+  io.to(game.id).emit('game-started', sanitizeGameState(game));
+  io.to(game.id).emit('game-state', sanitizeGameState(game));
 
-  // If the first player is a bot, start its turn
   if (game.players[0].isBot) {
     setTimeout(() => botTurn(game), 1000);
   }
 }
 
-// HANDLE PLAYER ACTION
 function handlePlayerAction(game, action, playerIndex) {
   const player = game.players[playerIndex];
   const playerName = player.name;
 
-  // FOR NEXT GAME BASE ON THE COSECUTIVE WINS
   const playerWinName = game.players.find(p => p.consecutiveWins === 1);
 
   switch (action.type) {
@@ -203,7 +231,6 @@ function handlePlayerAction(game, action, playerIndex) {
       break;
     case 'updateSelectedIndices':
       game.selectedCardIndices = action.indices;
-      // Don't update lastAction for this internal action
       break;
     case 'autoSort':
       handleAutoSort(game, playerIndex);
@@ -215,24 +242,31 @@ function handlePlayerAction(game, action, playerIndex) {
       break;
     case 'nextGame':
       handleNextGame(game);
-      game.lastAction = { player: playerWinName.name , type: 'started a new game' };
+      game.lastAction = { player: playerWinName?.name || playerName, type: 'started a new game' };
       break;
     case 'resetGame':
       handleResetGame(game);
       game.lastAction = { player: playerName, type: 'reset the game' };
       break;
-  }
-
-  // Emit the updated game state after each action
-  io.to(game.id).emit('game-state', game);
-
-  if (playerIndex === 0 && !game.firstPlayerHasPlayed && action.type !== 'draw') {
-    game.firstPlayerHasPlayed = true;
+    case 'fight':
+      handleFight(game, playerIndex);
+      game.lastAction = { player: playerName, type: 'initiated a fight' };
+      break;
+    case 'fight-response':
+      handleFightResponse(game, playerIndex, action.accept);
+      game.lastAction = { player: playerName, type: action.accept ? 'accepted the fight' : 'declined the fight' };
+      break;
+    case 'challenge':
+      handleChallenge(game, playerIndex, action.targetIndex);
+      game.lastAction = { player: playerName, type: 'initiated a challenge' };
+      break;
+    case 'challenge-response':
+      handleChallengeResponse(game, playerIndex, action.accept);
+      game.lastAction = { player: playerName, type: action.accept ? 'accepted the challenge' : 'declined the challenge' };
+      break;
   }
 }
 
-
-// PLAYER DRAW
 function handleDraw(game, fromDeck, meldIndices = []) {
   if (game.hasDrawnThisTurn) return;
 
@@ -244,7 +278,7 @@ function handleDraw(game, fromDeck, meldIndices = []) {
     const { canMeld } = canFormMeldWithCard(topCard, currentPlayer.hand);
 
     if (!canMeld) {
-      return; // Can't draw from discard if no potential meld
+      return;
     }
 
     drawnCard = game.discardPile.pop();
@@ -269,14 +303,12 @@ function handleDraw(game, fromDeck, meldIndices = []) {
     currentPlayer.hand.push(drawnCard);
     game.hasDrawnThisTurn = true;
     
-    // Set deckEmpty flag if this was the last card
     if (game.deck.length === 0) {
       game.deckEmpty = true;
     }
   }
 }
 
-// PLAYER DISCARD
 function handleDiscard(game, cardIndex) {
   const currentPlayer = game.players[game.currentPlayerIndex];
   
@@ -284,24 +316,19 @@ function handleDiscard(game, cardIndex) {
     return;
   }
 
-  // Remove the card from hand and add to discard pile
   const discardedCard = currentPlayer.hand.splice(cardIndex, 1)[0];
   game.discardPile.push(discardedCard);
   
-  // Reset draw state
   game.hasDrawnThisTurn = false;
   
-  // Check if game should end (deck is empty and player has discarded)
   if (game.deckEmpty) {
     handleCallDraw(game);
     return;
   }
   
-  // Move to next player
   game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.length;
 }
 
-// CALL A DRAW
 function handleCallDraw(game) {
   const scores = game.players.map(player => ({
     id: player.id,
@@ -325,7 +352,6 @@ function handleCallDraw(game) {
   game.gameEnded = true;
 }
 
-// PLAYER MELD A CARD
 function handleMeld(game, cardIndices) {
   const currentPlayer = game.players[game.currentPlayerIndex];
   const meldedCards = cardIndices.map(index => currentPlayer.hand[index]);
@@ -338,13 +364,11 @@ function handleMeld(game, cardIndices) {
   });
   game.selectedCardIndices = [];
 
-  // Check for Tongits (empty hand)
   if (currentPlayer.hand.length === 0) {
     handleTongits(game);
   }
 }
 
-// PLAYER DO A SAPAW
 function handleSapaw(game, targetPlayerIndex, targetMeldIndex, cardIndices) {
   const currentPlayer = game.players[game.currentPlayerIndex];
   const targetPlayer = game.players[targetPlayerIndex];
@@ -361,8 +385,6 @@ function handleSapaw(game, targetPlayerIndex, targetMeldIndex, cardIndices) {
   game.selectedCardIndices = [];
 }
 
-
-// HANDLE TONGIST
 function handleTongits(game) {
   const currentPlayer = game.players[game.currentPlayerIndex];
   currentPlayer.score = 0;
@@ -371,16 +393,15 @@ function handleTongits(game) {
   game.players.forEach(player => {
     if (player.id !== currentPlayer.id) {
       player.score = calculateHandPoints(player.hand);
-      // player.consecutiveWins = 0;
+      player.consecutiveWins = 0;
     }
   });
 
   game.winner = currentPlayer;
   game.gameEnded = true;
-  game.lastAction = { player: game.currentPlayerIndex, type: 'Achieved Tongits!' };
+  game.lastAction = { player: currentPlayer.name, type: 'Achieved Tongits!' };
 }
 
-// SORT A CARD
 function handleAutoSort(game, playerIndex) {
   const player = game.players[playerIndex];
   player.hand.sort((a, b) => {
@@ -391,7 +412,6 @@ function handleAutoSort(game, playerIndex) {
   });
 }
 
-// SHUFFLE CARD
 function handleShuffle(game, playerIndex) {
   const player = game.players[playerIndex];
   for (let i = player.hand.length - 1; i > 0; i--) {
@@ -400,52 +420,49 @@ function handleShuffle(game, playerIndex) {
   }
 }
 
-// NEXT GAME
 function handleNextGame(game) {
-  // Preserve consecutive wins from previous round
   const preservedConsecutiveWins = game.players.map(player => player.consecutiveWins || 0);
-
-  // Find the winner from the previous game
   const winnerIndex = preservedConsecutiveWins.indexOf(Math.max(...preservedConsecutiveWins));
 
-  // Start the next round
   game.round++;
-  game.deck = createDeck(); // Generate a new deck
+  game.deck = createDeck();
   const { hands, remainingDeck } = dealCards(game.deck, PLAYERS_REQUIRED, 12);
   game.deck = remainingDeck;
   game.deckEmpty = false;
   game.discardPile = [];
-  game.currentPlayerIndex = winnerIndex; // Set the winner as the starting player
-  game.hasDrawnThisTurn = true; // Set to true for the first player
+  game.currentPlayerIndex = winnerIndex;
+  game.hasDrawnThisTurn = true;
   game.gameEnded = false;
   game.selectedCardIndices = [];
   game.firstPlayerHasPlayed = false;
+  game.fightInitiator = null;
+  game.fightResponses = [];
+  game.challengeInitiator = null;
+  game.challengeTarget = null;
+  game.challengeResponses = [];
 
-  // Update the players' data, including preserving consecutive wins
-  game.players = hands.map((hand, index) => ({
-    ...game.players[index], // Keep the existing data from the previous game (including consecutiveWins)
-    hand,
+  game.players = game.players.map((player, index) => ({
+    ...player,
+    hand: hands[index],
     exposedMelds: [],
     secretMelds: [],
-    score: 0, // Reset score at the start of a new round
-    consecutiveWins: preservedConsecutiveWins[index], // Preserve consecutive wins from previous round
+    score: 0,
+    consecutiveWins: preservedConsecutiveWins[index],
     isSapawed: false,
     points: 0,
     turnsPlayed: 0,
   }));
 
-  // Give the winner an extra card
   game.players[winnerIndex].hand.push(game.deck.pop());
   game.lastAction = { player: game.players[winnerIndex].name, type: 'Next Game started' };
-  io.to(game.id).emit('game-state', game);
 
-  // If the first player is a bot, start its turn
+  io.to(game.id).emit('game-state', sanitizeGameState(game));
+
   if (game.players[winnerIndex].isBot) {
     setTimeout(() => botTurn(game), 1000);
   }
 }
 
-// RESET GAME
 function handleResetGame(game) {
   game.round = 1;
   game.players.forEach(player => {
@@ -454,8 +471,233 @@ function handleResetGame(game) {
   handleNextGame(game);
 }
 
+function handleFight(game, playerIndex) {
+  if (game.fightInitiator !== null || !game.hasDrawnThisTurn) return;
+
+  game.fightInitiator = playerIndex;
+  game.fightResponses = [];
+
+  io.to(game.id).emit('fight-initiated', { 
+    initiator: game.players[playerIndex].name,
+    initiatorIndex: playerIndex // Add this to help identify the initiator
+  });
+  
+  game.fightTimeout = setTimeout(() => handleFightTimeout(game), 30000);
+}
+
+function handleFightResponse(game, playerIndex, accept) {
+  if (game.fightInitiator === null || playerIndex === game.fightInitiator) return;
+
+  game.fightResponses.push({ playerIndex, accept });
+
+  io.to(game.id).emit('fight-response-received', { 
+    responder: game.players[playerIndex].name, 
+    accepted: accept 
+  });
+
+  if (game.fightResponses.length === game.players.length - 1) {
+    clearTimeout(game.fightTimeout);
+    resolveFight(game);
+  }
+}
+
+function resolveFight(game) {
+  // Count how many players accepted
+  const acceptedResponses = game.fightResponses.filter(response => response.accept);
+  const declinedResponses = game.fightResponses.filter(response => !response.accept);
+
+  // Calculate scores for all players
+  const playerScores = game.players.map((player, index) => ({
+    playerIndex: index,
+    name: player.name,
+    score: calculateHandPoints(player.hand)
+  }));
+
+  // If no one accepted, initiator wins automatically
+  if (acceptedResponses.length === 0) {
+    // Set scores for all players
+    game.players.forEach((player, index) => {
+      player.score = playerScores[index].score;
+      if (index === game.fightInitiator) {
+        player.consecutiveWins++;
+      } else {
+        player.consecutiveWins = 0;
+      }
+    });
+
+    game.winner = game.players[game.fightInitiator];
+    game.gameEnded = true;
+
+    // Create score summary
+    const scoreMessage = game.players.map(player => 
+      `${player.name}: ${player.score}`
+    ).join(', ');
+
+    game.lastAction = { 
+      player: game.players[game.fightInitiator]?.name, 
+      type: `Won the fight by default! All players declined. (Scores: ${scoreMessage})`
+    };
+  }
+  // If at least one player accepted and one declined
+  else if (acceptedResponses.length > 0 && declinedResponses.length > 0) {
+    // Players who declined automatically lose
+    declinedResponses.forEach(response => {
+      const player = game.players[response.playerIndex];
+      player.consecutiveWins = 0;
+      player.score = playerScores[response.playerIndex].score;
+    });
+
+    // Compare scores between initiator and accepting players only
+    const playersToCompare = [
+      game.fightInitiator, 
+      ...acceptedResponses.map(r => r.playerIndex)
+    ];
+
+    const scores = playersToCompare.map(playerIndex => ({
+      playerIndex,
+      score: playerScores[playerIndex].score
+    }));
+
+    const winner = scores.reduce((min, player) => 
+      player.score < min.score ? player : min
+    );
+
+    // Update consecutive wins and scores
+    game.players.forEach((player, index) => {
+      player.score = playerScores[index].score;
+      if (index === winner.playerIndex) {
+        player.consecutiveWins++;
+      } else if (playersToCompare.includes(index)) {
+        player.consecutiveWins = 0;
+      }
+    });
+
+    game.winner = game.players[winner.playerIndex];
+    game.gameEnded = true;
+
+    // Create score summary
+    const scoreMessage = game.players.map(player => 
+      `${player.name}: ${player.score}`
+    ).join(', ');
+
+    game.lastAction = { 
+      player: game.players[game.fightInitiator]?.name, 
+      type: `Fight resolved - ${game.players[winner.playerIndex].name} won! (Scores: ${scoreMessage})`
+    };
+  } 
+  // If all players accepted
+  else if (acceptedResponses.length === game.players.length - 1) {
+    // All players accepted - compare all scores
+    const winner = playerScores.reduce((min, player) => 
+      player.score < min.score ? player : min
+    );
+
+    // Update scores and consecutive wins
+    game.players.forEach((player, index) => {
+      player.score = playerScores[index].score;
+      if (index === winner.playerIndex) {
+        player.consecutiveWins++;
+      } else {
+        player.consecutiveWins = 0;
+      }
+    });
+
+    game.winner = game.players[winner.playerIndex];
+    game.gameEnded = true;
+
+    // Create score summary
+    const scoreMessage = game.players.map(player => 
+      `${player.name}: ${player.score}`
+    ).join(', ');
+
+    game.lastAction = { 
+      player: game.players[game.fightInitiator]?.name, 
+      type: `Won the fight! (Scores: ${scoreMessage})` 
+    };
+  }
+
+  game.fightInitiator = null;
+  game.fightResponses = [];
+
+  // Include scores in the fight-resolved event
+  io.to(game.id).emit('fight-resolved', { 
+    winner: game.winner ? game.winner.name : null,
+    scores: game.players.map(player => ({
+      name: player.name,
+      score: player.score
+    }))
+  });
+}
+
+function handleChallenge(game, playerIndex, targetIndex) {
+  if (game.challengeInitiator !== null || playerIndex === targetIndex) return;
+
+  game.challengeInitiator = playerIndex;
+  game.challengeTarget = targetIndex;
+  game.challengeResponses = [];
+
+  io.to(game.id).emit('challenge-initiated', { 
+    initiator: game.players[playerIndex].name,
+    target: game.players[targetIndex].name
+  });
+}
+
+function handleChallengeResponse(game, playerIndex, accept) {
+  if (game.challengeInitiator === null || playerIndex !== game.challengeTarget) return;
+
+  if (accept) {
+    resolveChallenge(game);
+  } else {
+    game.lastAction = { player: game.players[playerIndex].name, type: 'Declined the challenge' };
+    game.challengeInitiator = null;
+    game.challengeTarget = null;
+  }
+}
+
+function resolveChallenge(game) {
+  const initiatorScore = calculateHandPoints(game.players[game.challengeInitiator].hand);
+  const targetScore = calculateHandPoints(game.players[game.challengeTarget].hand);
+
+  if (initiatorScore < targetScore) {
+    game.lastAction = { player: game.players[game.challengeInitiator].name, type: 'Won the challenge' };
+    game.players[game.challengeInitiator].consecutiveWins++;
+    game.players[game.challengeTarget].consecutiveWins = 0;
+  } else {
+    game.lastAction = { player: game.players[game.challengeTarget].name, type: 'Won the challenge' };
+    game.players[game.challengeTarget].consecutiveWins++;
+    game.players[game.challengeInitiator].consecutiveWins = 0;
+  }
+
+  game.challengeInitiator = null;
+  game.challengeTarget = null;
+
+  io.to(game.id).emit('challenge-resolved', { 
+    winner: initiatorScore < targetScore ? 
+            game.players[game.challengeInitiator].name : 
+            game.players[game.challengeTarget].name
+  });
+}
+
+function handleFightTimeout(game) {
+  if (game.fightInitiator === null) return;
+
+  const nonRespondingPlayers = game.players.filter((_, index) => 
+    index !== game.fightInitiator && !game.fightResponses.some(r => r.playerIndex === index)
+  );
+
+  nonRespondingPlayers.forEach(player => {
+    game.fightResponses.push({ playerIndex: game.players.indexOf(player), accept: false });
+  });
+
+  resolveFight(game);
+}
+
+function botTurn(game) {
+  // Bot logic implementation would go here
+  console.log("Bot turn - not implemented");
+}
+
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
