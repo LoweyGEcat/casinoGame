@@ -58,6 +58,7 @@ function sanitizeGameState(game) {
     challengeInitiator: game.challengeInitiator,
     challengeTarget: game.challengeTarget,
     challengeResponses: game.challengeResponses,
+    hasWinner: game.hasWinner,
     winner: game.winner ? {
       id: game.winner.id,
       name: game.winner.name
@@ -92,7 +93,8 @@ io.on('connection', (socket) => {
         challengeInitiator: null,
         challengeTarget: null,
         challengeResponses: [],
-        fightTimeout: null
+        fightTimeout: null,
+        hasWinner : false
       };
       games.set(game.id, game);
     }
@@ -463,14 +465,56 @@ function handleNextGame(game) {
   }
 }
 
-function handleResetGame(game) {
+function handleResetGame(game) {  
   game.round = 1;
-  game.players.forEach(player => {
-    player.consecutiveWins = 0;
-  });
-  handleNextGame(game);
-}
+  game.deck = createDeck();
+  const { hands, remainingDeck } = dealCards(game.deck, PLAYERS_REQUIRED, 12);
+  game.deck = remainingDeck;
+  game.deckEmpty = false;
+  game.discardPile = [];
+  game.currentPlayerIndex = 0;
+  game.hasDrawnThisTurn = false; // Changed to false so first player can draw
+  game.gameEnded = false;
+  game.selectedCardIndices = [];
+  game.firstPlayerHasPlayed = false;
+  game.fightInitiator = null;
+  game.fightResponses = [];
+  game.challengeInitiator = null;
+  game.challengeTarget = null;
+  game.challengeResponses = [];
+  game.gameStarted = true; // Add this to ensure game is marked as started
 
+  // Reset player states
+  game.players = game.players.map((player, index) => ({
+    ...player,
+    hand: hands[index],
+    exposedMelds: [],
+    secretMelds: [],
+    score: 0,
+    consecutiveWins: 0,
+    isSapawed: false,
+    points: 0,
+    turnsPlayed: 0,
+  }));
+
+  // Give first player an extra card
+  game.players[0].hand.push(game.deck.pop());
+  game.lastAction = { player: game.players[0].name, type: 'Game Reset' };
+
+  // Emit reset event first
+  io.to(game.id).emit('game-reset', {
+    newGameId: game.id,
+    message: 'The game has been reset.'
+  });
+
+  // Start the game after a short delay
+  setTimeout(() => {
+    io.to(game.id).emit('game-started', sanitizeGameState(game));
+    io.to(game.id).emit('game-state', sanitizeGameState(game));
+  }, 1000);
+
+  console.log("Game Reset");
+}
 function handleFight(game, playerIndex) {
   if (game.fightInitiator !== null || !game.hasDrawnThisTurn) return;
 
