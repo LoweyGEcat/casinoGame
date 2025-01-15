@@ -4,18 +4,28 @@ import { gsap } from "gsap";
 import { motion } from "framer-motion";
 import { Card } from "../TongitsGame/play-bot/Card";
 import Scoreboard from "./Scoreboard";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
-function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset,setPlayersCount }) {
+function ScoreDashboard({
+  socketId,
+  gameState,
+  onClose,
+  resetGame,
+  Reset,
+  ContinueGame,
+}) {
   const hasResetRef = useRef(false);
   const scoreboardRef = useRef(null);
   // const [scale, setScale] = useState(1);
   const [isWinner, setIsWinner] = useState();
-  const [countdown, setCountdown] = useState(7);
+  const [countdown, setCountdown] = useState(10);
   const [closing, setClosing] = useState(false); // Added closing state
   const [showDetails, setShowDetails] = useState(false); // New state for toggling scoreboard visibility
   const [shouldNavigate, setShouldNavigate] = useState(false);
   const router = useRouter();
+  const winners = gameState.players.filter((p) => p.consecutiveWins === 1);
+
+  console.log("winners", gameState);
 
   // Animate for pop up
   useEffect(() => {
@@ -63,12 +73,10 @@ function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset,setPlaye
     setClosing(true); // Start the countdown immediately when the component mounts
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     if (shouldNavigate) {
-      const winners = gameState.players.filter((p) => p.consecutiveWins === 2);
-
       if (winners.length > 0) {
-        resetGame()
+        resetGame();
       } else {
         Reset();
       }
@@ -96,6 +104,7 @@ function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset,setPlaye
 
   return (
     <motion.div
+    key={socketId}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
@@ -175,7 +184,8 @@ function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset,setPlaye
                           <h3
                             className="font-robotoSans font-extrabold text-3xl p-2"
                             style={{
-                              color: player.id === isWinner ? "#FFEE00" : "#CEC9C9",
+                              color:
+                                player.id === isWinner ? "#FFEE00" : "#CEC9C9",
                               textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
                             }}
                           >
@@ -235,7 +245,8 @@ function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset,setPlaye
                         <h3
                           className="text-white text-2xl font-extrabold font-robotoSans"
                           style={{
-                            color: player.id === isWinner ? "#00FF22" : "#FF0000",
+                            color:
+                              player.id === isWinner ? "#00FF22" : "#FF0000",
                             textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
                           }}
                         >
@@ -248,27 +259,54 @@ function ScoreDashboard({socketId ,gameState, onClose, resetGame, Reset,setPlaye
                 );
               })}
               <div className=" flex justify-end text-white font-extrabold text-xl gap-2">
-                <button
-                  onClick={handleClose} // Close button triggers the closing logic
-                  className="bg-text-gradient py-2 px-5 rounded-full border-2 border-slate-300"
-                  style={{
-                    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-                  }}
-                >
-                  Close
-                </button>
-                <button
-                  onClick={handleViewDetails} // Toggle scoreboard visibility on button click
-                  className="bg-Button-gradient py-2 px-5 rounded-full border-2 border-slate-300"
-                  style={{
-                    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-                  }}
-                >
-                  View Details
-                </button>
+                {gameState.players.some((p) => p.consecutiveWins === 1) ? (
+                  <>
+                    <button
+                      onClick={resetGame}
+                      className="bg-text-gradient py-2 px-5 rounded-full border-2 border-slate-300"
+                      style={{
+                        textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                      }}
+                    >
+                      Quit
+                    </button>
+                    <button
+                      onClick={ContinueGame}
+                      className="bg-Button-gradient py-2 px-5 rounded-full border-2 border-slate-300"
+                      style={{
+                        textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                      }}
+                    >
+                      Continue
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleClose}
+                      className="bg-text-gradient py-2 px-5 rounded-full border-2 border-slate-300 "
+                      style={{
+                        textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                      }}
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={handleViewDetails}
+                      className="bg-Button-gradient py-2 px-5 rounded-full border-2 border-slate-300"
+                      style={{
+                        textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                      }}
+                    >
+                      View Details
+                    </button>
+                  </>
+                )}
               </div>
             </div>
-            {showDetails && <Scoreboard gameState={gameState} onClose={handleClose} />}
+            {showDetails && (
+              <Scoreboard gameState={gameState} onClose={handleClose} />
+            )}
           </div>
         </div>
       </div>

@@ -147,8 +147,41 @@ const Game = () => {
       setTimer(timer);
     });
 
+    if (!socket) return;
+    // create game-reset
+    socket.on('game-reset', ({ newGameId, message }) => {
+      // Reset all game state except playersCount
+      setGameState(null);
+      setIsWaiting(true);
+      setGameStarted(false);
+      setIsDealingDone(false);
+      setSelectedIndices([]);
+      setDiscardingIndex(null);
+      setSelectedSapawTarget(null);
+      setIsAutoPlaying(false);
+      setCurrentAction(null);
+      setIsFightModalOpen(false);
+      setIsChallengeModalOpen(false);
+      setIsDiscardPileOpen(false);
+      setIsScoreboardVisible(false);
+      setTimer(20); // Reset timer
+  
+      // Re-join with the same player name
+      if (playerName) {
+        socket.emit('join-game', playerName);
+      }
+    });
+  
     return () => {
-      if (newSocket) newSocket.disconnect();
+      socket.off('game-reset');
+      socket.off('game-started');
+      socket.off('game-state');
+      socket.off('timer-update');
+      socket.off('player-joined');
+      socket.off('player-disconnected');
+      socket.off('fight-initiated');
+      socket.off('fight-response-received');
+      socket.off('fight-resolved');
     };
   }, []);
 
@@ -156,12 +189,13 @@ const Game = () => {
     const isPlayerTurn =
       gameState &&
       gameState.currentPlayerIndex ===
-        gameState.players.findIndex((p) => p.id === socket.id);
-    if (isPlayerTurn && !gameState.gameEnded) {
+        gameState.players.findIndex((p) => p.id === socket?.id);
+  
+    if (isPlayerTurn && !gameState?.gameEnded) {
       if (!timerRef.current) {
         timerRef.current = setInterval(() => {
           setTimer((prevTimer) => {
-            if (prevTimer === 1) {
+            if (prevTimer <= 1) {
               clearInterval(timerRef.current);
               timerRef.current = null;
               setTimerExpired(true);
@@ -178,16 +212,15 @@ const Game = () => {
         timerRef.current = null;
       }
       setTimerExpired(false);
-      setTimer(20); // Reset timer when it's not player's turn
     }
-
+  
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
     };
-  }, [gameState, socket]);
+  }, [gameState, socket?.id]);
 
   const isAnimatingRef = useRef(false);
   const discardTimeoutRef = useRef(null);
@@ -231,8 +264,9 @@ const Game = () => {
   }, [gameState, socket, isAutoPlaying]);
 
   const handleJoinGame = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (playerName.trim() && socket) {
+      console.log("Joining game with name:", playerName);
       socket.emit("join-game", playerName);
     }
   };
@@ -257,10 +291,11 @@ const Game = () => {
             type: "shuffle",
             playerIndex: gameState.players.findIndex((p) => p.id === socket.id),
           });
-        }else if(action.type === "fight"){
-          socket.emit("player-action", {type: "fight"});
-        }else if(action.type === "challenge"){
-          socket.emit("player-action", {type: "challenge", targetIndex: action.targetIndex});
+        } else if (action.type === "fight") {
+          socket.emit("player-action", { type: "fight" });
+          setIsFightModalOpen(true);
+        } else if (action.type === "challenge") {
+          socket.emit("player-action", { type: "challenge", targetIndex: action.targetIndex });
         } else {
           socket.emit("player-action", action);
         }
@@ -284,37 +319,40 @@ const Game = () => {
   };
 
   const canDrawFromDiscard = useCallback(() => {
-    if (!gameState || gameState.discardPile.length === 0) return false;
-    const topDiscardCard =
-      gameState.discardPile[gameState.discardPile.length - 1];
-    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-
-    for (let i = 0; i < currentPlayer.hand.length; i++) {
-      for (let j = i + 1; j < currentPlayer.hand.length; j++) {
-        if (
-          isValidMeld([
-            topDiscardCard,
-            currentPlayer.hand[i],
-            currentPlayer.hand[j],
-          ])
-        ) {
+    try {
+      if (!gameState || gameState.discardPile.length === 0) return false;
+      const topDiscardCard =
+        gameState.discardPile[gameState.discardPile.length - 1];
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  
+      for (let i = 0; i < currentPlayer?.hand.length; i++) {
+        for (let j = i + 1; j < currentPlayer?.hand.length; j++) {
+          if (
+            isValidMeld([
+              topDiscardCard,
+              currentPlayer?.hand[i],
+              currentPlayer?.hand[j],
+            ])
+          ) {
+            return true;
+          }
+        }
+      }
+  
+      for (const meld of currentPlayer?.exposedMelds) {
+        if (isValidMeld([...meld, topDiscardCard])) {
           return true;
         }
       }
+  
+      return false;
+    } catch (error) {
+      router.push("/TongitsGame/Gamebet");
     }
-
-    for (const meld of currentPlayer.exposedMelds) {
-      if (isValidMeld([...meld, topDiscardCard])) {
-        return true;
-      }
-    }
-
-    return false;
-  }, [gameState]);
+  }, [gameState,router]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleChat = () => setIsChatOpen(!isChatOpen);
-  const toggleDiscardPile = () => setIsDiscardPileOpen(!isDiscardPileOpen);
 
   const animateClick = () => {
     setScale(0.99);
@@ -384,9 +422,41 @@ const Game = () => {
   };
 
   const resetGame = () => {
-    const value = searchParams.get("betAmount");
+    socket.emit('player-action', { type: 'resetGame' });
     router.push(`/TongitsGame/Gamebet`);
-    handleAction({ type: "resetGame" });
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  };
+
+  const ContinueGame = () => {
+    // Reset all relevant state variables except playersCount
+    setGameState(null);
+    setIsWaiting(true);
+    setGameStarted(false);
+    setIsDealingDone(false);
+    setSelectedIndices([]);
+    setDiscardingIndex(null);
+    setSelectedSapawTarget(null);
+    setIsAutoPlaying(false);
+    setCurrentAction(null);
+    setIsFightModalOpen(false);
+    setIsChallengeModalOpen(false);
+    setIsDiscardPileOpen(false);
+    setIsScoreboardVisible(false);
+    setTimer(20)
+    setGameState(null);
+    setIsFightModalOpen(false)
+    setIsChallengeModalOpen(false)
+    setIsDiscardPileOpen(false)
+    setChallengeTarget(null)
+    setPlayersCount(0)
+    // ITO LANG MUNA APPROACH KO FOR NOW RESET NEXT GAME ENCOUNTER ERROR 
+    // IF WALA REFRESH NAIIWAN UNG MGA DATA KAHIT NAG RESET NA
+    const value = searchParams.get("betAmount");
+    router.push(`/TongitsGame/live-game/multiplayer?betAmount=20000`);
+    window.location.reload();
+    socket.emit('player-action', { type: 'resetGame' });
   };
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
@@ -636,6 +706,7 @@ const Game = () => {
 
       {gameState.gameEnded && (
         <ScoreDashboard
+          ContinueGame={ContinueGame}
           socketId={socket.id}
           gameState={gameState}
           onClose={() => setIsScoreboardVisible(false)}
@@ -671,3 +742,4 @@ const Game = () => {
 };
 
 export default Game;
+
