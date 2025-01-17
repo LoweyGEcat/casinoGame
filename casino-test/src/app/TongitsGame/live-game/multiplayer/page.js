@@ -61,7 +61,7 @@ const Game = () => {
   }, [searchParams,router]);
 
   useEffect(() => {
-    const newSocket = io('http://localhost:5000');
+    const newSocket = io('https://casinogame1.onrender.com');
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
