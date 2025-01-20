@@ -2,13 +2,14 @@
 "use client"
 
 import React from "react";
-import Image from "next/image";
 
 const GameFooter = ({
   onMeld,
   onDiscard,
   onSapaw,
   onCallDraw,
+  onFight,
+  onChallenge,
   isPlayerTurn,
   gameEnded,
   hasDrawnThisTurn,
@@ -64,6 +65,7 @@ const GameFooter = ({
           disabled={!isPlayerTurn || !selectedSapawTarget || selectedIndices.length === 0 || !hasDrawnThisTurn || gameEnded}
         >
           <img
+            onClick={animateClick}
             src="/image/sapawButton.svg"
             alt="Sapaw"
             className="w-[115px] 2xl:w-[145px] h-full"
@@ -74,9 +76,9 @@ const GameFooter = ({
             }}
           />
         </button>
-        <button
+        {/* <button
           onClick={onCallDraw}
-          disabled={!isPlayerTurn || selectedIndices.length < 3 || !hasDrawnThisTurn || gameEnded}
+          disabled={!isPlayerTurn || !hasDrawnThisTurn || gameEnded}
         >
           <img
             onClick={animateClick}
@@ -86,10 +88,42 @@ const GameFooter = ({
             style={{
               transform: `scale(${scale})`,
               transition: "transform 0.3s ease-in-out",
-              opacity: (!isPlayerTurn || selectedIndices.length < 3 || !hasDrawnThisTurn || gameEnded) ? 0.5 : 1
+              opacity: (!isPlayerTurn || !hasDrawnThisTurn || gameEnded) ? 0.5 : 1
+            }}
+          />
+        </button> */}
+        <button
+          onClick={onFight}
+          disabled={!isPlayerTurn || !hasDrawnThisTurn || gameEnded}
+        >
+          <img
+            onClick={animateClick}
+            src="/image/fightButton.svg"
+            alt="Fight"
+            className="w-[115px] 2xl:w-[145px] h-full"
+            style={{
+              transform: `scale(${scale})`,
+              transition: "transform 0.3s ease-in-out",
+              opacity: (!isPlayerTurn || !hasDrawnThisTurn || gameEnded) ? 0.5 : 1
             }}
           />
         </button>
+        {/* <button
+          onClick={onChallenge}
+          disabled={!isPlayerTurn || gameEnded}
+        >
+          <img
+            onClick={animateClick}
+            src="/image/challengeButton.svg"
+            alt="Challenge"
+            className="w-[115px] 2xl:w-[145px] h-full"
+            style={{
+              transform: `scale(${scale})`,
+              transition: "transform 0.3s ease-in-out",
+              opacity: (!isPlayerTurn || gameEnded) ? 0.5 : 1
+            }}
+          />
+        </button> */}
       </div>
       <div className="h-full flex gap-1 justify-center items-center">
         <button onClick={onAutoSort}>
@@ -146,4 +180,3 @@ const GameFooter = ({
 };
 
 export default GameFooter;
-

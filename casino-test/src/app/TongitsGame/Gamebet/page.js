@@ -11,9 +11,14 @@ function GameBet() {
     router.push(`/TongitsGame/live-game/multiplayer?betAmount=${bet}`);
   };
   const [activeIndex, setActiveIndex] = useState(null);
+
   const handleClick = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
+
+  const exitGamebet = () => {
+    router.push("/TongitsGame");
+  }
 
   return (
     <div
@@ -26,7 +31,7 @@ function GameBet() {
     >
       <div className="absolute w-screen h-16 top-0 bg-user-name">
         <div className="flex flex-row h-full w-full justify-between">
-          <button>
+          <button onClick={exitGamebet}>
             <Image
               src="/image/existButton.svg"
               alt="My image"
