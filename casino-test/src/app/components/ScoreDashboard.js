@@ -23,7 +23,7 @@ function ScoreDashboard({
   const [showDetails, setShowDetails] = useState(false); // New state for toggling scoreboard visibility
   const [shouldNavigate, setShouldNavigate] = useState(false);
   const router = useRouter();
-  const winners = gameState.players.filter((p) => p.consecutiveWins === 1);
+  const winners = gameState.players.filter((p) => p.consecutiveWins === 2);
 
   console.log("winners", gameState);
 
@@ -259,7 +259,7 @@ function ScoreDashboard({
                 );
               })}
               <div className=" flex justify-end text-white font-extrabold text-xl gap-2">
-                {gameState.players.some((p) => p.consecutiveWins === 1) ? (
+                {gameState.players.some((p) => p.consecutiveWins === 2) ? (
                   <>
                     <button
                       onClick={resetGame}
