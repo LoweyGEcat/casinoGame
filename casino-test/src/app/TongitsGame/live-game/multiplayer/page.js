@@ -56,7 +56,7 @@ const Game = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [timer, setTimer] = useState(20);
+  const [timer, setTimer] = useState(40);
   const [timerExpired, setTimerExpired] = useState(false);
   const timerRef = useRef(null);
 
@@ -165,7 +165,7 @@ const Game = () => {
       setIsChallengeModalOpen(false);
       setIsDiscardPileOpen(false);
       setIsScoreboardVisible(false);
-      setTimer(20); // Reset timer
+      setTimer(40); // Reset timer
   
       // Re-join with the same player name
       if (playerName) {
@@ -201,7 +201,7 @@ const Game = () => {
               timerRef.current = null;
               setTimerExpired(true);
               handleAutoPlay();
-              return 20;
+              return 40;
             }
             return prevTimer - 1;
           });
@@ -445,7 +445,7 @@ const Game = () => {
     setIsChallengeModalOpen(false);
     setIsDiscardPileOpen(false);
     setIsScoreboardVisible(false);
-    setTimer(20)
+    setTimer(40)
     setGameState(null);
     setIsFightModalOpen(false)
     setIsChallengeModalOpen(false)
@@ -467,12 +467,16 @@ const Game = () => {
   const isPlayerTurn =
     gameState.currentPlayerIndex ===
     gameState.players.findIndex((p) => p.id === socket.id);
+
+    
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/TableBot.svg')] bg-no-repeat bg-cover bg-center relative">
       <div className="absolute w-screen h-16 top-0 bg-custom-gradient">
         <div className="flex flex-row h-full w-full justify-between">
           <button onClick={toggleSidebar}>
-            <img
+            <Image
+              width={100}
+              height={100}
               onClick={animateClick}
               src="/image/sideBarButton.svg"
               alt="Sidebar"
@@ -606,7 +610,9 @@ const Game = () => {
       </div>
       <div className="absolute right-0 bottom-0 w-24 h-24 ">
         <button onClick={toggleChat}>
-          <img
+          <Image
+            width={100}
+            height={100}
             onClick={animateClick}
             src="/image/chatButton.svg"
             alt="My image"
@@ -717,7 +723,7 @@ const Game = () => {
         />
       )}
 
-      <ChatSideBar  isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      <ChatSideBar  isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} socket={socket} gameId={gameState.id} playerIndex={playerIndex} />
       {currentAction && <ActionText action={currentAction} />}
 
       <FightModal

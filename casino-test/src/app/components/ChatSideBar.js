@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import ChatPanel from "./ChatPanel";
 
-const ChatSideBar = ({ isOpen, onClose }) => {
+const ChatSideBar = ({ isOpen, onClose, socket, playerIndex, gameId }) => {
   useEffect(() => {
     const handleEscape = (event) => {
       if (event.key === "Escape") {
@@ -40,13 +41,6 @@ const ChatSideBar = ({ isOpen, onClose }) => {
               {/* Icon */}
               <div className="">
                 <div className="flex items-center gap-2 px-5 justify-end bg-gradient-to-r from-[rgba(173,0,0,1)] to-[rgba(23,33,34,1)] h-16  bg-opacity-70 -z-10 ">
-                  <button className="text-black hover:text-gray-500 focus:outline-none octagon bg-white p-1 shadow-md focus:text-gray-500 transition ease-in-out duration-150 z-10">
-                    <img
-                      src="/image/searchButton.svg"
-                      alt="My image"
-                      className="w-5 h-5"
-                    />
-                  </button>
                   <button
                     onClick={onClose}
                     className="text-black hover:text-gray-500 focus:outline-none octagon bg-white p-1 shadow-md focus:text-gray-500 transition ease-in-out duration-150 z-10"
@@ -68,64 +62,22 @@ const ChatSideBar = ({ isOpen, onClose }) => {
                 </div>
               </div>
               {/* button */}
-              <div className="w-full  h-20 flex justify-center items-center px-10 gap-1">
+              <div className="w-full  h-20 flex justify-start items-center px-5 gap-1">
                 <button
                   className="relative h-10 px-6 text-white uppercase tracking-tighter font-jaro text-2xl bg-opacity-80 z-10
-                  before:absolute before:inset-0 bg-rightBar-Button border border-black font-extrabold
-                  after:absolute after:inset-0 after:bg-gradient-to-b after:from-[#2a1f1f] after:to-[#4a3636]
+                  before:absolute before:inset-0 bg-rightBar-Button border border-black font-extraboldbg-gradient-to-b after:from-[#2a1f1f] after:to-[#4a3636]
                   after:opacity-0 
                   shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]
-                  skew-x-[-20deg]"
+                  "
                   style={{
                     WebkitTextStroke: "0.5px black",
                     textStroke: "0.5px black",
                   }}
                 >
-                  <span className="inline-block skew-x-[20deg]">lobby</span>
-                </button>
-                <button
-                  className="relative h-10 px-6 text-white uppercase tracking-tighter font-jaro text-2xl bg-opacity-50
-                  before:absolute before:inset-0 bg-rightBar-Button border border-black font-extrabold
-                  after:absolute after:inset-0 after:bg-gradient-to-b after:from-[#2a1f1f] after:to-[#4a3636]
-                  after:opacity-0 
-                  shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]
-                  skew-x-[-20deg]"
-                  style={{
-                    WebkitTextStroke: "0.5px black",
-                    textStroke: "0.5px black",
-                  }}
-                >
-                  <span className="inline-block skew-x-[20deg]">Group</span>
-                </button>
-                <button
-                  className="relative h-10 px-6 text-white uppercase tracking-tighter font-jaro text-2xl bg-opacity-50
-                  before:absolute before:inset-0 bg-rightBar-Button border border-black font-extrabold
-                  after:absolute after:inset-0 after:bg-gradient-to-b after:from-[#2a1f1f] after:to-[#4a3636]
-                  after:opacity-0 
-                  shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]
-                  skew-x-[-20deg]"
-                  style={{
-                    WebkitTextStroke: "0.5px black",
-                    textStroke: "0.5px black",
-                  }}
-                >
-                  <span className="inline-block skew-x-[20deg]">Friends</span>
-                </button>
-                <button
-                  className="relative h-10 px-6 text-white uppercase tracking-tighter font-jaro text-2xl bg-opacity-50
-                  before:absolute before:inset-0 bg-rightBar-Button border border-black font-extrabold
-                  after:absolute after:inset-0 after:bg-gradient-to-b after:from-[#2a1f1f] after:to-[#4a3636]
-                  after:opacity-0 
-                  shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]
-                  skew-x-[-20deg]"
-                  style={{
-                    WebkitTextStroke: "0.5px black",
-                    textStroke: "0.5px black",
-                  }}
-                >
-                  <span className="inline-block skew-x-[20deg]">World</span>
+                  <span className="">lobby</span>
                 </button>
               </div>
+              <ChatPanel socket={socket} playerIndex={playerIndex} gameId={gameId}/>
             </div>
           </div>
         </section>

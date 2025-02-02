@@ -154,6 +154,14 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on("send_message", (data) => {
+    socket.to(data.room).emit("receive_message", {
+      message: data.message,
+      author: data.author,
+      time: new Date().toLocaleTimeString(),
+    })
+  })
+
   socket.on('disconnect', () => {
     console.log(`${socket.id} disconnected`);
     for (const [gameId, game] of games) {
