@@ -347,6 +347,19 @@ function handleDraw(game, fromDeck, meldIndices = []) {
     }
 
     drawnCard = game.discardPile.pop()
+
+        if (meldIndices.length > 0) {
+      const meldCards = [...meldIndices.map(i => currentPlayer.hand[i]), drawnCard];
+      if (isValidMeld(meldCards)) {
+        meldIndices.sort((a, b) => b - a).forEach(index => {
+          currentPlayer.hand.splice(index, 1);
+        });
+        currentPlayer.exposedMelds.push(meldCards);
+        game.selectedCardIndices = [];
+        game.hasDrawnThisTurn = true;
+        return;
+      }
+    }
   } else if (game.deck.length > 0) {
     drawnCard = game.deck.pop()
   }
@@ -356,11 +369,12 @@ function handleDraw(game, fromDeck, meldIndices = []) {
     game.drawnCard = drawnCard
     game.drawnCardVisible = true
     game.hasDrawnThisTurn = true
+  } 
 
-    if (game.deck.length === 0) {
-      game.deckEmpty = true
-    }
+  if (game.deck.length === 0) {
+    game.deckEmpty = true
   }
+  
 }
 
 // Add new function to handle adding drawn card to hand
@@ -869,6 +883,11 @@ function handleDenyDrawnCard(game) {
     game.drawnCardVisible = false
     game.hasDrawnThisTurn = false
 
+
+    if (game.deckEmpty) {
+      handleCallDraw(game);
+      return;
+    }
     // Move to the next player
     game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.length
   }
