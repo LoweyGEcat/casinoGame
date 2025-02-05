@@ -247,6 +247,14 @@ function handlePlayerAction(game, action, playerIndex) {
   const playerWinName = game.players.find((p) => p.consecutiveWins === 1);
 
   switch (action.type) {
+    case "drawShow":
+      handleDrawShow(game, action.fromDeck, action.meldIndices);
+      game.lastAction = {
+        player: playerName,
+        type: action.fromDeck ? "drew from deck" : "drew from discard pile",
+      };
+      break;
+    
     case "draw":
       handleDraw(game, action.fromDeck, action.meldIndices);
       game.lastAction = {
@@ -333,6 +341,49 @@ function handlePlayerAction(game, action, playerIndex) {
 
 // note player draw a card
 function handleDraw(game, fromDeck, meldIndices = []) {
+  if (game.hasDrawnThisTurn) return
+
+  const currentPlayer = game.players[game.currentPlayerIndex]
+  let drawnCard
+
+  if (!fromDeck && game.discardPile.length > 0) {
+    const topCard = game.discardPile[game.discardPile.length - 1]
+    const { canMeld } = canFormMeldWithCard(topCard, currentPlayer.hand)
+
+    if (!canMeld) {
+      return
+    }
+
+    drawnCard = game.discardPile.pop();
+
+    if (meldIndices.length > 0) {
+      const meldCards = [...meldIndices.map(i => currentPlayer.hand[i]), drawnCard];
+      if (isValidMeld(meldCards)) {
+        meldIndices.sort((a, b) => b - a).forEach(index => {
+          currentPlayer.hand.splice(index, 1);
+        });
+        currentPlayer.exposedMelds.push(meldCards);
+        game.selectedCardIndices = [];
+        game.hasDrawnThisTurn = true;
+        return;
+      }
+    }
+  } else if (game.deck.length > 0) {
+    drawnCard = game.deck.pop()
+  }
+
+  if(drawnCard){
+    currentPlayer.hand.push(drawnCard)
+    game.hasDrawnThisTurn = true
+  }
+
+  if (game.deck.length === 0) {
+    game.deckEmpty = true
+  }
+  
+}
+
+function handleDrawShow(game, fromDeck, meldIndices = []) {
   if (game.hasDrawnThisTurn) return
 
   const currentPlayer = game.players[game.currentPlayerIndex]
