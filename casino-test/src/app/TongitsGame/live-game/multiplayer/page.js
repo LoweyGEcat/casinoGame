@@ -566,7 +566,7 @@ const Game = () => {
               onDraw={() =>
                 isPlayerTurn &&
                 !gameState.gameEnded &&
-                handleAction({ type: "draw", fromDeck: true })
+                handleAction({ type: "drawShow", fromDeck: true })
               }
               disabled={
                 gameState.hasDrawnThisTurn ||
