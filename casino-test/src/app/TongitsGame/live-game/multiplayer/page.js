@@ -24,6 +24,7 @@ import ActionText from "@/app/components/ActionText";
 import FightModal from "@/app/components/FightChallengeModal";
 import ChallengeModal from "@/app/components/ChanllengeModal";
 import DrawnCardModal from "@/app/components/DrawnCardModal";
+import { Card } from "../../play-bot/Card";
 
 const Game = () => {
   const [gameState, setGameState] = useState(null);
@@ -58,7 +59,7 @@ const Game = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [timer, setTimer] = useState(40);
+  const [timer, setTimer] = useState(2000);
   const [timerExpired, setTimerExpired] = useState(false);
   const timerRef = useRef(null);
 
@@ -180,7 +181,7 @@ const Game = () => {
       setIsChallengeModalOpen(false);
       setIsDiscardPileOpen(false);
       setIsScoreboardVisible(false);
-      setTimer(40); // Reset timer
+      setTimer(2000); // Reset timer
       setDrawnCardDisplay(null); // Reset drawnCardDisplay
       setDrawnCard(null); // Reset drawnCard
       setShowDrawnCardModal(false); // Hide drawn card modal
@@ -219,7 +220,7 @@ const Game = () => {
               timerRef.current = null;
               setTimerExpired(true);
               handleAutoPlay();
-              return 40;
+              return 2000;
             }
             return prevTimer - 1;
           });
@@ -484,7 +485,7 @@ const Game = () => {
     setIsChallengeModalOpen(false);
     setIsDiscardPileOpen(false);
     setIsScoreboardVisible(false);
-    setTimer(40);
+    setTimer(2000);
     setGameState(null);
     setIsFightModalOpen(false);
     setIsChallengeModalOpen(false);
@@ -548,6 +549,7 @@ const Game = () => {
         <div className="w-full flex flex-col justify-between items-center gap-10">
           <div className="absolute z-10">
             <MeldedCards
+              isPlayerTurn={isPlayerTurn}
               contextText={`text-3xl`}
               gameState={gameState}
               socket={socket.id}
@@ -574,21 +576,12 @@ const Game = () => {
                 gameState.gameEnded
               }
             />
+            {/* // todo make this a components */}
             {/* Show drawn card beside the deck */}
             {drawnCard && isPlayerTurn && (
-              <div className="absolute -left-32 top-0">
-                <div className="w-[100px] h-[140px] bg-white rounded-lg shadow-lg flex flex-col items-center justify-center border-2 border-gray-300">
-                  <div
-                    className={`text-${
-                      drawnCard.suit === "♥" || drawnCard.suit === "♦"
-                        ? "red"
-                        : "black"
-                    }-600 text-2xl`}
-                  >
-                    {drawnCard.rank}
-                    {drawnCard.suit}
-                  </div>
-
+              <div className="absolute -left-32 top-10">
+                <div className="flex justify-center flex-col items-center">
+                  <Card card={drawnCard} cardSize={"w-16 h-auto p-1 text-xl 2xl:text-lg"}/>
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={handleAcceptCard}
