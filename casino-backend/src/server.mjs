@@ -154,6 +154,16 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("audio_stream", (audioData) => {
+    if (audioData && audioData.audio && Array.isArray(audioData.audio)) {
+      // Forward the Float32Array data to other clients in the room
+      socket.to(audioData.room).emit("audio_stream", audioData.audio)
+      console.log("Audio data received:", audioData)
+    } else {
+      console.error("Invalid audio data received:", audioData)
+    }
+  })
+
   socket.on("player-action", (action) => {
     const game = Array.from(games.values()).find((g) =>
       g.players.some((p) => p.id === socket.id)
