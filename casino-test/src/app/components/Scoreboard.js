@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import CrystalSnowAnimation from "./snowflakes";
 import { motion } from 'framer-motion'
+import Image from "next/image";
 
 function Scoreboard({ gameState, onClose }) {
   const scoreboardRef = useRef(null);
@@ -56,7 +57,9 @@ function Scoreboard({ gameState, onClose }) {
           className="text-black hover:text-gray-500 top-0 left-0 focus:outline-none  shadow-md focus:text-gray-500 transition ease-in-out duration-150 z-10 "
           onClick={onClose}
         >
-          <img
+          <Image
+            width={100}
+            height={100}
             onClick={animateClick}
             src="/image/existButton.svg"
             alt="My image"
@@ -70,7 +73,9 @@ function Scoreboard({ gameState, onClose }) {
       </div>
       {/* Score board Title */}
       <div className="w-full h-24  top-24 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 absolute lg:w-10/12 ">
-        <img
+        <image
+          width={100}
+          height={100}
           onClick={animateClick}
           src="/image/scoreboardHeader.svg"
           alt="My image"

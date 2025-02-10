@@ -28,7 +28,9 @@ function PlayerIcon({ playerIndex, players, positioning, currentPlayerPOV }) {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-full blur-sm"></div>
-            <img
+            <Image
+              width={100}
+              height={100}
               src={imageUrl || "/placeholder.svg?height=64&width=64"}
               alt={`Player ${playerIndex + 1}`}
               className="relative w-16 h-16 rounded-full object-cover border-2 border-white/20"
