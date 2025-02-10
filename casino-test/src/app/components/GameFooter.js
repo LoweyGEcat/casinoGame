@@ -76,22 +76,6 @@ const GameFooter = ({
             }}
           />
         </button>
-        {/* <button
-          onClick={onCallDraw}
-          disabled={!isPlayerTurn || !hasDrawnThisTurn || gameEnded}
-        >
-          <img
-            onClick={animateClick}
-            src="/image/fightButton.svg"
-            alt="Call Draw"
-            className="w-[115px] 2xl:w-[145px] h-full"
-            style={{
-              transform: `scale(${scale})`,
-              transition: "transform 0.3s ease-in-out",
-              opacity: (!isPlayerTurn || !hasDrawnThisTurn || gameEnded) ? 0.5 : 1
-            }}
-          />
-        </button> */}
         <button
           onClick={onFight}
           disabled={!isPlayerTurn || !hasDrawnThisTurn || gameEnded}
@@ -108,22 +92,6 @@ const GameFooter = ({
             }}
           />
         </button>
-        {/* <button
-          onClick={onChallenge}
-          disabled={!isPlayerTurn || gameEnded}
-        >
-          <img
-            onClick={animateClick}
-            src="/image/challengeButton.svg"
-            alt="Challenge"
-            className="w-[115px] 2xl:w-[145px] h-full"
-            style={{
-              transform: `scale(${scale})`,
-              transition: "transform 0.3s ease-in-out",
-              opacity: (!isPlayerTurn || gameEnded) ? 0.5 : 1
-            }}
-          />
-        </button> */}
       </div>
       <div className="h-full flex gap-1 justify-center items-center">
         <button onClick={onAutoSort}>

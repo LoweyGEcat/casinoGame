@@ -1,7 +1,6 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
-import { Volume2, VolumeX } from 'lucide-react'
 import gsap from "gsap"
 
 export default function DealingAnimation({ onComplete }) {
@@ -105,19 +104,6 @@ export default function DealingAnimation({ onComplete }) {
 
   return (
     <div className="fixed inset-0" ref={containerRef}>
-      {/* Sound toggle button */}
-      <button
-        onClick={toggleAudio}
-        className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors"
-        aria-label={isAudioEnabled ? "Disable sound" : "Enable sound"}
-      >
-        {isAudioEnabled ? (
-          <Volume2 className="w-6 h-6" />
-        ) : (
-          <VolumeX className="w-6 h-6" />
-        )}
-      </button>
-
       <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
         <div className="w-14 2xl:w-24 h-20 2xl:h-28 bg-[url(/image/cardBackground.svg)] bg-no-repeat bg-cover bg-center rounded-lg shadow-xl" />
       </div>

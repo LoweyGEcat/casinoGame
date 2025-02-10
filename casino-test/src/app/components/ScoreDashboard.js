@@ -27,7 +27,6 @@ function ScoreDashboard({
   const router = useRouter();
   const winners = gameState.players.filter((p) => p.consecutiveWins === 2);
 
-  console.log("winners", gameState);
 
   // Animate for pop up
   useEffect(() => {

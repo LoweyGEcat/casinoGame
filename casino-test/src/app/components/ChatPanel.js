@@ -14,7 +14,6 @@ function ChatPanel({ socket, playerIndex, gameId }) {
   useEffect(() => {
     // Listen for incoming messages
     const handleReceiveMessage = (data) => {
-      console.log("Received message:", data) // Debug log
       setMessages((prev) => [...prev, data])
     }
 
@@ -42,8 +41,6 @@ function ChatPanel({ socket, playerIndex, gameId }) {
         time: new Date().toLocaleTimeString(),
       }
 
-      console.log("Sending message:", messageData) // Debug log
-
       socket.emit("send_message", messageData)
 
       // Add message to local state
@@ -52,8 +49,6 @@ function ChatPanel({ socket, playerIndex, gameId }) {
       setCurrentMessage("")
     }
   }
-
-  console.log(messages)
 
   return (
     <div className="h-full w-full bg-gray-800/10 flex flex-col px-5">
