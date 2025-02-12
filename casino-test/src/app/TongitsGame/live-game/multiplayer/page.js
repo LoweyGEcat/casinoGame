@@ -60,7 +60,7 @@ const Game = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [timer, setTimer] = useState(2000);
+  const [timer, setTimer] = useState(40);
   const [timerExpired, setTimerExpired] = useState(false);
   const timerRef = useRef(null);
   const previousPlayerIndexRef = useRef(null)
@@ -182,7 +182,7 @@ const Game = () => {
       setIsChallengeModalOpen(false);
       setIsDiscardPileOpen(false);
       setIsScoreboardVisible(false);
-      setTimer(2000); // Reset timer
+      setTimer(40); // Reset timer
       setDrawnCardDisplay(null); // Reset drawnCardDisplay
       setDrawnCard(null); // Reset drawnCard
       setShowDrawnCardModal(false); // Hide drawn card modal
@@ -217,7 +217,7 @@ const Game = () => {
           clearInterval(timerRef.current)
           timerRef.current = null
         }
-        setTimer(2000)
+        setTimer(40)
         setTimerExpired(false)
       }
 
@@ -231,7 +231,7 @@ const Game = () => {
               if (isPlayerTurn) {
                 handleAutoPlay()
               }
-              return 2000
+              return 40
             }
             return prevTimer - 1
           })
@@ -499,7 +499,7 @@ const Game = () => {
     setIsChallengeModalOpen(false);
     setIsDiscardPileOpen(false);
     setIsScoreboardVisible(false);
-    setTimer(2000);
+    setTimer(40);
     setGameState(null);
     setIsFightModalOpen(false);
     setIsChallengeModalOpen(false);
@@ -721,6 +721,7 @@ const Game = () => {
       <GameFooter
         timer={timer}
         onShuffle={() => handleAction({ type: "shuffle" })}
+        onAutoSort={()=> handleAction({ type: "autoSort" })}
         onMeld={() => {
           if (
             isPlayerTurn &&
