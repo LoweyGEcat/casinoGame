@@ -63,6 +63,7 @@ const Game = () => {
   const [timer, setTimer] = useState(2000);
   const [timerExpired, setTimerExpired] = useState(false);
   const timerRef = useRef(null);
+  const previousPlayerIndexRef = useRef(null)
 
   useEffect(() => {
     const value = searchParams.get("betAmount");
@@ -206,41 +207,54 @@ const Game = () => {
   }, []);
 
   useEffect(() => {
-    const isPlayerTurn =
-      gameState &&
-      gameState.currentPlayerIndex ===
-        gameState.players.findIndex((p) => p.id === socket?.id);
+    const currentPlayerIndex = gameState?.currentPlayerIndex
+    const isPlayerTurn = gameState && currentPlayerIndex === gameState.players.findIndex((p) => p.id === socket?.id)
 
-    if (isPlayerTurn && !gameState?.gameEnded) {
+    if (!gameState?.gameEnded && isDealingDone) {
+      // Reset timer only when the turn changes
+      if (currentPlayerIndex !== previousPlayerIndexRef.current) {
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+          timerRef.current = null
+        }
+        setTimer(2000)
+        setTimerExpired(false)
+      }
+
       if (!timerRef.current) {
         timerRef.current = setInterval(() => {
           setTimer((prevTimer) => {
             if (prevTimer <= 1) {
-              clearInterval(timerRef.current);
-              timerRef.current = null;
-              setTimerExpired(true);
-              handleAutoPlay();
-              return 2000;
+              clearInterval(timerRef.current)
+              timerRef.current = null
+              setTimerExpired(true)
+              if (isPlayerTurn) {
+                handleAutoPlay()
+              }
+              return 2000
             }
-            return prevTimer - 1;
-          });
-        }, 1000);
+            return prevTimer - 1
+          })
+        }, 1000)
       }
     } else {
       if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
+        clearInterval(timerRef.current)
+        timerRef.current = null
       }
-      setTimerExpired(false);
+      setTimerExpired(false)
     }
+
+    // Update the previous player index
+    previousPlayerIndexRef.current = currentPlayerIndex
 
     return () => {
       if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
+        clearInterval(timerRef.current)
+        timerRef.current = null
       }
-    };
-  }, [gameState, socket?.id, isDealingDone]); // Added isDealingDone to dependencies
+    }
+  }, [gameState, socket?.id, isDealingDone]) 
 
   const isAnimatingRef = useRef(false);
   const discardTimeoutRef = useRef(null);
@@ -506,9 +520,9 @@ const Game = () => {
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const playerIndex = gameState.players.findIndex((p) => p.id === socket.id);
   const player = gameState.players[playerIndex];
-  const isPlayerTurn =
-    gameState.currentPlayerIndex ===
-    gameState.players.findIndex((p) => p.id === socket.id);
+  const isPlayerTurn = gameState.currentPlayerIndex === gameState.players.findIndex((p) => p.id === socket.id);
+
+    console.log("gameState", timer);
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/TableBot.svg')] bg-no-repeat bg-cover bg-center relative">
