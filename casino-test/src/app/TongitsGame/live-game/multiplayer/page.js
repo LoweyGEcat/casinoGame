@@ -58,18 +58,19 @@ const Game = () => {
   const [showDrawnCardModal, setShowDrawnCardModal] = useState(false); // Added state variable
   const [counter, setCounter] = useState(0);
   const [enableFight, setEnableFight] = useState(false);
-  const [isCurrentPlayerSapawTarget, setIsCurrentPlayerSapawTarget] = useState(false);
+  const [isCurrentPlayerSapawTarget, setIsCurrentPlayerSapawTarget] =
+    useState(false);
   const [sapawCounter, setSapawCounter] = useState(1);
-  const [isPlayerSapawCounter, setIsPlayerSapawCounter] = useState(0);
 
   const searchParams = useSearchParams();
   const router = useRouter();
-  const hasIncremented = useRef(false)
+  const hasIncremented = useRef(false);
 
   const [timer, setTimer] = useState(40);
   const [timerExpired, setTimerExpired] = useState(false);
   const timerRef = useRef(null);
-  const previousPlayerIndexRef = useRef(null)
+  const previousPlayerIndexRef = useRef(null);
+  const hasProcessedTurnEnd = useRef(false);
 
   useEffect(() => {
     const value = searchParams.get("betAmount");
@@ -213,141 +214,153 @@ const Game = () => {
   }, []);
 
   useEffect(() => {
-    const currentPlayerIndex = gameState?.currentPlayerIndex
-    const isPlayerTurn = gameState && currentPlayerIndex === gameState.players.findIndex((p) => p.id === socket?.id)
+    const currentPlayerIndex = gameState?.currentPlayerIndex;
+    const isPlayerTurn =
+      gameState &&
+      currentPlayerIndex ===
+        gameState.players.findIndex((p) => p.id === socket?.id);
 
     if (!gameState?.gameEnded && isDealingDone) {
       // Reset timer only when the turn changes
       if (currentPlayerIndex !== previousPlayerIndexRef.current) {
         if (timerRef.current) {
-          clearInterval(timerRef.current)
-          timerRef.current = null
+          clearInterval(timerRef.current);
+          timerRef.current = null;
         }
-        setTimer(40)
-        setTimerExpired(false)
+        setTimer(40);
+        setTimerExpired(false);
       }
 
       if (!timerRef.current) {
         timerRef.current = setInterval(() => {
           setTimer((prevTimer) => {
             if (prevTimer <= 1) {
-              clearInterval(timerRef.current)
-              timerRef.current = null
-              setTimerExpired(true)
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+              setTimerExpired(true);
               if (isPlayerTurn) {
-                handleAutoPlay()
+                handleAutoPlay();
               }
-              return 40
+              return 40;
             }
-            return prevTimer - 1
-          })
-        }, 1000)
+            return prevTimer - 1;
+          });
+        }, 1000);
       }
     } else {
       if (timerRef.current) {
-        clearInterval(timerRef.current)
-        timerRef.current = null
+        clearInterval(timerRef.current);
+        timerRef.current = null;
       }
-      setTimerExpired(false)
+      setTimerExpired(false);
     }
 
     // Update the previous player index
-    previousPlayerIndexRef.current = currentPlayerIndex
+    previousPlayerIndexRef.current = currentPlayerIndex;
 
     return () => {
       if (timerRef.current) {
-        clearInterval(timerRef.current)
-        timerRef.current = null
+        clearInterval(timerRef.current);
+        timerRef.current = null;
       }
-    }
-  }, [gameState, socket?.id, isDealingDone]) 
-
+    };
+  }, [gameState, socket?.id, isDealingDone]);
 
   useEffect(() => {
     if (gameState?.gameEnded === true) {
-      setCounter(1)
-      setEnableFight(false)
-      hasIncremented.current = true
+      setCounter(1);
+      setEnableFight(false);
+      hasIncremented.current = true;
 
       if (gameState?.currentPlayerIndex !== undefined && gameState?.players) {
-        const previousPlayerIndex = (gameState.currentPlayerIndex - 1 + gameState.players.length) % gameState.players.length
-        const previousPlayerId = gameState.players[previousPlayerIndex].id
-  
+        const previousPlayerIndex =
+          (gameState.currentPlayerIndex - 1 + gameState.players.length) %
+          gameState.players.length;
+        const previousPlayerId = gameState.players[previousPlayerIndex].id;
+
         if (previousPlayerId === socket?.id && !hasIncremented.current) {
           setCounter((prevCounter) => {
-            const newCounter = prevCounter + 1
-              if (newCounter > 1) {
-                setEnableFight(true)
-              }
-              return newCounter
-          })
-          hasIncremented.current = true
+            const newCounter = prevCounter + 1;
+            if (newCounter > 1) {
+              setEnableFight(true);
+            }
+            return newCounter;
+          });
+          hasIncremented.current = true;
         } else if (previousPlayerId !== socket?.id) {
-          hasIncremented.current = true
+          hasIncremented.current = true;
         }
       }
     } else {
-    
-    if (gameState?.currentPlayerIndex !== undefined && gameState?.players) {
-      const previousPlayerIndex = (gameState.currentPlayerIndex - 1 + gameState.players.length) % gameState.players.length
-      const previousPlayerId = gameState.players[previousPlayerIndex].id
+      if (gameState?.currentPlayerIndex !== undefined && gameState?.players) {
+        const previousPlayerIndex =
+          (gameState.currentPlayerIndex - 1 + gameState.players.length) %
+          gameState.players.length;
+        const previousPlayerId = gameState.players[previousPlayerIndex].id;
 
-      if (previousPlayerId === socket?.id && !hasIncremented.current) {
-        setCounter((prevCounter) => {
-          const newCounter = prevCounter + 1
+        if (previousPlayerId === socket?.id && !hasIncremented.current) {
+          setCounter((prevCounter) => {
+            const newCounter = prevCounter + 1;
             if (newCounter > 1) {
-              setEnableFight(true)
+              setEnableFight(true);
             }
-            return newCounter
-        })
-        hasIncremented.current = true
-      } else if (previousPlayerId !== socket?.id) {
-        hasIncremented.current = false
+            return newCounter;
+          });
+          hasIncremented.current = true;
+        } else if (previousPlayerId !== socket?.id) {
+          hasIncremented.current = false;
+        }
       }
     }
-  }
-}, [gameState?.currentPlayerIndex, gameState?.players, socket?.id, gameState?.gameEnded])
+  }, [
+    gameState?.currentPlayerIndex,
+    gameState?.players,
+    socket?.id,
+    gameState?.gameEnded,
+  ]);
 
-// Declare this ref at the component level
-const hasProcessedTurnEnd = useRef(false);
+  useEffect(() => {
+    if (gameState && gameState.players && socket) {
+      const player = gameState.players.find((p) => p.id === socket.id);
 
-useEffect(() => {
-if (gameState && gameState.players && socket) {
-  const player = gameState.players.find((p) => p.id === socket.id);
-  
-  // Update state for sapaw target status
-  if (isPlayerSapawCounter > 0) {
-    setIsCurrentPlayerSapawTarget(false);
-  } else {
-    if (player && isCurrentPlayerSapawTarget !== player.isSapawed) {
-      setIsCurrentPlayerSapawTarget(player.isSapawed);
+      if (player && isCurrentPlayerSapawTarget !== player.isSapawed) {
+        setIsCurrentPlayerSapawTarget(player.isSapawed);
+      }
+
+      // Determine turn status
+      const isCurrentPlayerTurn =
+        gameState.currentPlayerIndex ===
+        gameState.players.findIndex((p) => p.id === socket.id);
+      const didTurnJustEnd = !isCurrentPlayerTurn && isCurrentPlayerSapawTarget;
+
+      // Reset flag when player's turn starts
+      if (isCurrentPlayerTurn) {
+        hasProcessedTurnEnd.current = false;
+      }
+
+      // Increment logic (runs only once per valid turn end)
+      if (didTurnJustEnd && !hasProcessedTurnEnd.current) {
+        if (sapawCounter < 2) {
+          setSapawCounter((prev) => prev + 1);
+        } else if (sapawCounter === 2) {
+          setSapawCounter(1);
+          if (socket && socket.connected) {
+            try {
+              socket.emit("sapaw", { playerId: socket.id });
+            } catch (error) {
+              console.error("Error emitting sapaw event:", error);
+            }
+          } else {
+            console.error("Socket is not connected");
+          }
+          setIsCurrentPlayerSapawTarget(player.isSapawed);
+        } else {
+          setSapawCounter((prev) => prev + 1);
+        }
+        hasProcessedTurnEnd.current = true;
+      }
     }
-  }
-
-  // Determine turn status
-  const isCurrentPlayerTurn = 
-    gameState.currentPlayerIndex === gameState.players.findIndex((p) => p.id === socket.id);
-  const didTurnJustEnd = !isCurrentPlayerTurn && isCurrentPlayerSapawTarget;
-
-  // Reset flag when player's turn starts
-  if (isCurrentPlayerTurn) {
-    hasProcessedTurnEnd.current = false;
-  }
-
-  // Increment logic (runs only once per valid turn end)
-  if (didTurnJustEnd && !hasProcessedTurnEnd.current) {
-    if (sapawCounter < 2) {
-      setSapawCounter((prev) => prev + 1);
-    } else if (sapawCounter === 2) {
-      setSapawCounter(1);
-      setIsPlayerSapawCounter((prev) => prev + 1);
-    } else {
-      setSapawCounter((prev) => prev + 1);
-    }
-    hasProcessedTurnEnd.current = true; // Prevent duplicate increments
-  }
-}
-}, [gameState, socket?.id, isCurrentPlayerSapawTarget, sapawCounter, isPlayerSapawCounter]);
+  }, [gameState, socket?.id, isCurrentPlayerSapawTarget, sapawCounter]);
 
   const isAnimatingRef = useRef(false);
   const discardTimeoutRef = useRef(null);
@@ -613,9 +626,9 @@ if (gameState && gameState.players && socket) {
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const playerIndex = gameState.players.findIndex((p) => p.id === socket.id);
   const player = gameState.players[playerIndex];
-  const isPlayerTurn = gameState.currentPlayerIndex === gameState.players.findIndex((p) => p.id === socket.id);
-
-    console.log("gameState", timer);
+  const isPlayerTurn =
+    gameState.currentPlayerIndex ===
+    gameState.players.findIndex((p) => p.id === socket.id);
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/TableBot.svg')] bg-no-repeat bg-cover bg-center relative">
@@ -687,7 +700,10 @@ if (gameState && gameState.players && socket) {
             {drawnCard && isPlayerTurn && (
               <div className="absolute -left-32 top-10">
                 <div className="flex justify-center flex-col items-center">
-                  <Card card={drawnCard} cardSize={"w-16 h-auto p-1 text-xl 2xl:text-lg"}/>
+                  <Card
+                    card={drawnCard}
+                    cardSize={"w-16 h-auto p-1 text-xl 2xl:text-lg"}
+                  />
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={handleAcceptCard}
@@ -814,7 +830,7 @@ if (gameState && gameState.players && socket) {
       <GameFooter
         timer={timer}
         onShuffle={() => handleAction({ type: "shuffle" })}
-        onAutoSort={()=> handleAction({ type: "autoSort" })}
+        onAutoSort={() => handleAction({ type: "autoSort" })}
         onMeld={() => {
           if (
             isPlayerTurn &&
@@ -865,10 +881,13 @@ if (gameState && gameState.players && socket) {
           }
         }}
         onFight={() => {
-          if (isPlayerTurn && !gameState.gameEnded || !gameState.hasDrawnThisTurn) {
-            handleAction({ type: "fight" })
-          }else{
-            alert("You can't fight")
+          if (
+            (isPlayerTurn && !gameState.gameEnded) ||
+            !gameState.hasDrawnThisTurn
+          ) {
+            handleAction({ type: "fight" });
+          } else {
+            alert("You can't fight");
           }
         }}
         onChallenge={() => {
