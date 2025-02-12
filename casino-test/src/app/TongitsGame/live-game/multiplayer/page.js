@@ -56,9 +56,15 @@ const Game = () => {
   const [drawnCardDisplay, setDrawnCardDisplay] = useState(null); // Added state variable
   const [drawnCard, setDrawnCard] = useState(null);
   const [showDrawnCardModal, setShowDrawnCardModal] = useState(false); // Added state variable
+  const [counter, setCounter] = useState(0);
+  const [enableFight, setEnableFight] = useState(false);
+  const [isCurrentPlayerSapawTarget, setIsCurrentPlayerSapawTarget] = useState(false);
+  const [sapawCounter, setSapawCounter] = useState(1);
+  const [isPlayerSapawCounter, setIsPlayerSapawCounter] = useState(0);
 
   const searchParams = useSearchParams();
   const router = useRouter();
+  const hasIncremented = useRef(false)
 
   const [timer, setTimer] = useState(40);
   const [timerExpired, setTimerExpired] = useState(false);
@@ -255,6 +261,93 @@ const Game = () => {
       }
     }
   }, [gameState, socket?.id, isDealingDone]) 
+
+
+  useEffect(() => {
+    if (gameState?.gameEnded === true) {
+      setCounter(1)
+      setEnableFight(false)
+      hasIncremented.current = true
+
+      if (gameState?.currentPlayerIndex !== undefined && gameState?.players) {
+        const previousPlayerIndex = (gameState.currentPlayerIndex - 1 + gameState.players.length) % gameState.players.length
+        const previousPlayerId = gameState.players[previousPlayerIndex].id
+  
+        if (previousPlayerId === socket?.id && !hasIncremented.current) {
+          setCounter((prevCounter) => {
+            const newCounter = prevCounter + 1
+              if (newCounter > 1) {
+                setEnableFight(true)
+              }
+              return newCounter
+          })
+          hasIncremented.current = true
+        } else if (previousPlayerId !== socket?.id) {
+          hasIncremented.current = true
+        }
+      }
+    } else {
+    
+    if (gameState?.currentPlayerIndex !== undefined && gameState?.players) {
+      const previousPlayerIndex = (gameState.currentPlayerIndex - 1 + gameState.players.length) % gameState.players.length
+      const previousPlayerId = gameState.players[previousPlayerIndex].id
+
+      if (previousPlayerId === socket?.id && !hasIncremented.current) {
+        setCounter((prevCounter) => {
+          const newCounter = prevCounter + 1
+            if (newCounter > 1) {
+              setEnableFight(true)
+            }
+            return newCounter
+        })
+        hasIncremented.current = true
+      } else if (previousPlayerId !== socket?.id) {
+        hasIncremented.current = false
+      }
+    }
+  }
+}, [gameState?.currentPlayerIndex, gameState?.players, socket?.id, gameState?.gameEnded])
+
+// Declare this ref at the component level
+const hasProcessedTurnEnd = useRef(false);
+
+useEffect(() => {
+if (gameState && gameState.players && socket) {
+  const player = gameState.players.find((p) => p.id === socket.id);
+  
+  // Update state for sapaw target status
+  if (isPlayerSapawCounter > 0) {
+    setIsCurrentPlayerSapawTarget(false);
+  } else {
+    if (player && isCurrentPlayerSapawTarget !== player.isSapawed) {
+      setIsCurrentPlayerSapawTarget(player.isSapawed);
+    }
+  }
+
+  // Determine turn status
+  const isCurrentPlayerTurn = 
+    gameState.currentPlayerIndex === gameState.players.findIndex((p) => p.id === socket.id);
+  const didTurnJustEnd = !isCurrentPlayerTurn && isCurrentPlayerSapawTarget;
+
+  // Reset flag when player's turn starts
+  if (isCurrentPlayerTurn) {
+    hasProcessedTurnEnd.current = false;
+  }
+
+  // Increment logic (runs only once per valid turn end)
+  if (didTurnJustEnd && !hasProcessedTurnEnd.current) {
+    if (sapawCounter < 2) {
+      setSapawCounter((prev) => prev + 1);
+    } else if (sapawCounter === 2) {
+      setSapawCounter(1);
+      setIsPlayerSapawCounter((prev) => prev + 1);
+    } else {
+      setSapawCounter((prev) => prev + 1);
+    }
+    hasProcessedTurnEnd.current = true; // Prevent duplicate increments
+  }
+}
+}, [gameState, socket?.id, isCurrentPlayerSapawTarget, sapawCounter, isPlayerSapawCounter]);
 
   const isAnimatingRef = useRef(false);
   const discardTimeoutRef = useRef(null);
@@ -772,12 +865,10 @@ const Game = () => {
           }
         }}
         onFight={() => {
-          if (
-            isPlayerTurn &&
-            !gameState.gameEnded &&
-            gameState.hasDrawnThisTurn
-          ) {
-            handleAction({ type: "fight" });
+          if (isPlayerTurn && !gameState.gameEnded || !gameState.hasDrawnThisTurn) {
+            handleAction({ type: "fight" })
+          }else{
+            alert("You can't fight")
           }
         }}
         onChallenge={() => {
@@ -794,6 +885,8 @@ const Game = () => {
         hasDrawnThisTurn={gameState.hasDrawnThisTurn}
         selectedIndices={selectedIndices}
         selectedSapawTarget={selectedSapawTarget}
+        enableFight={enableFight}
+        isSapawed={isCurrentPlayerSapawTarget}
       />
 
       {gameState.gameEnded && (
