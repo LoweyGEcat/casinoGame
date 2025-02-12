@@ -678,7 +678,7 @@ function handleResetGame(game) {
 
 // note player do fight
 function handleFight(game, playerIndex) {
-  if (game.fightInitiator !== null || !game.hasDrawnThisTurn) return;
+  if (game.fightInitiator !== null) return;
 
   game.fightInitiator = playerIndex;
   game.fightResponses = [];
