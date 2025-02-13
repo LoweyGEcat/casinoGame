@@ -44,7 +44,7 @@ export function PlayerHand({
   }, [hand]);
 
   const handleCardClick = (index) => {
-    if (isCurrentPlayer) {
+    if (isCurrentPlayer || !isCurrentPlayer) {
       onCardClick(index);
       setSelectedCards(prev => {
         const newSet = new Set(prev);

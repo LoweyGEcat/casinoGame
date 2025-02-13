@@ -186,6 +186,38 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("sapaw", (data) => {
+    
+    const { playerId } = data;
+    
+    const game = Array.from(games.values()).find((g) =>
+      g.players.some((p) => p.id === playerId)
+    );
+  
+    if (!game) {
+      return;
+    }
+  
+    const playerIndex = game.players.findIndex((p) => p.id === playerId);
+    if (playerIndex === -1) {
+
+      return;
+    }
+  
+    const updatedPlayers = [...game.players];
+    updatedPlayers[playerIndex] = {
+      ...updatedPlayers[playerIndex],
+      isSapawed: false
+    };
+  
+    const updatedGame = {...game, players: updatedPlayers};
+
+    io.to(game.id).emit("game-state", sanitizeGameState(updatedGame));
+  
+    // Update the game in your games collection
+    games.set(game.id, updatedGame);
+  });
+
   socket.on("send_message", (data) => {
     socket.to(data.room).emit("receive_message", {
       message: data.message,
