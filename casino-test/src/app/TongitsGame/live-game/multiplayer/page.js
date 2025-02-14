@@ -55,10 +55,12 @@ const Game = () => {
   const [drawnCardDisplay, setDrawnCardDisplay] = useState(null) // Added state variable
   const [drawnCard, setDrawnCard] = useState(null)
   const [showDrawnCardModal, setShowDrawnCardModal] = useState(false) // Added state variable
-  const [counter, setCounter] = useState(0)
-  const [enableFight, setEnableFight] = useState(false)
-  const [isCurrentPlayerSapawTarget, setIsCurrentPlayerSapawTarget] = useState(false)
-  const [sapawCounter, setSapawCounter] = useState(1)
+  const [counter, setCounter] = useState(0);
+  const [enableFight, setEnableFight] = useState(false);
+  const [isCurrentPlayerSapawTarget, setIsCurrentPlayerSapawTarget] = useState(false);
+  const [sapawCounter, setSapawCounter] = useState(1);
+  const [selectedCard, setSelectedCard] = useState(false);
+  const [meld, setMeld] = useState(false);
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -394,7 +396,14 @@ const Game = () => {
   const handleAction = useCallback(
     (action) => {
       if (gameState && socket) {
-        if (action.type === "discard" && selectedIndices.length === 1) {
+        if (action.type === "autoSort") {
+          // Allow auto-sort for the current player at any time
+          const playerIndices = [socket.id]
+          socket.emit("player-action", {
+            type: "autoSort",
+            playerIndices: playerIndices,
+            requestingPlayerId: socket.id,})
+        } else if (action.type === "discard" && selectedIndices.length === 1) {
           setDiscardingIndex(selectedIndices[0])
           setTimeout(() => {
             socket.emit("player-action", action)
@@ -402,11 +411,11 @@ const Game = () => {
             setDiscardingIndex(null)
           }, 300)
         } else if (action.type === "shuffle") {
-          // Emit the shuffle action with the current player's index
+          const playerIndices = [socket.id]
           socket.emit("player-action", {
             type: "shuffle",
-            playerIndex: gameState.players.findIndex((p) => p.id === socket.id),
-          })
+            playerIndices: playerIndices,
+            requestingPlayerId: socket.id,})
         } else if (action.type === "fight") {
           socket.emit("player-action", { type: "fight" })
           setIsFightModalOpen(true)
@@ -708,10 +717,19 @@ const Game = () => {
               cardSize={" w-1.5 h-22 p-2 text-4xl"}
               hand={gameState.players.find((p) => p.id === socket.id)?.hand}
               onCardClick={(index) => {
-                if (isPlayerTurn && !gameState.gameEnded) {
+                if (!gameState.gameEnded) {
                   const newSelectedIndices = selectedIndices.includes(index)
                     ? selectedIndices.filter((i) => i !== index)
-                    : [...selectedIndices, index]
+                    : [...selectedIndices, index];
+
+                    if (isValidMeld(newSelectedIndices.map((i) => player.hand[i]))) {
+                      setSelectedCard(true);
+                    } else {
+                      setSelectedCard(false);
+                    }
+  
+                    // if(isValidMeld())
+                    setSelectedIndices(newSelectedIndices);
                   setSelectedIndices(newSelectedIndices)
                   handleAction({
                     type: "updateSelectedIndices",
@@ -758,11 +776,27 @@ const Game = () => {
 
       <GameFooter
         timer={timer}
-        onShuffle={() => handleAction({ type: "shuffle" })}
-        onAutoSort={() => handleAction({ type: "autoSort" })}
+        onShuffle={() => {
+          // Allow auto-sort for the current player only
+          const playerIndices = [socket.id]
+          handleAction({ type: "shuffle", playerIndices: playerIndices })
+        }}
+        onAutoSort={() => {
+          // Allow auto-sort for the current player only
+          const playerIndices = [socket.id]
+          handleAction({ type: "autoSort", playerIndices: playerIndices })
+        }}
         onMeld={() => {
-          if (isPlayerTurn && selectedIndices.length >= 3 && !gameState.gameEnded) {
-            handleAction({ type: "meld", cardIndices: selectedIndices })
+          if (
+            isPlayerTurn &&
+            selectedIndices.length >= 3 &&
+            !gameState.gameEnded
+          ) {
+            setMeld(true);
+            setTimeout(() => {
+              setMeld(false);
+            }, 500);
+            handleAction({ type: "meld", cardIndices: selectedIndices });
           }
           selectedIndices.length > 0 && setSelectedIndices([])
         }}
@@ -814,6 +848,8 @@ const Game = () => {
         selectedSapawTarget={selectedSapawTarget}
         enableFight={enableFight}
         isSapawed={isCurrentPlayerSapawTarget}
+        selectedCard={selectedCard}
+        drawnCard={drawnCard}
       />
 
       {gameState.gameEnded && (
