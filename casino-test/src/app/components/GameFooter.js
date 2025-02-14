@@ -1,7 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
-"use client"
+"use client";
 
 import React from "react";
+
+import DeclareWar from "./declare-fight";
 
 const GameFooter = ({
   onMeld,
@@ -16,7 +18,7 @@ const GameFooter = ({
   selectedIndices,
   selectedSapawTarget,
   onAutoSort,
-  onShuffle
+  onShuffle,
 }) => {
   const [scale, setScale] = React.useState(1);
 
@@ -30,7 +32,12 @@ const GameFooter = ({
       <div className="space-x-3">
         <button
           onClick={onMeld}
-          disabled={!isPlayerTurn || selectedIndices.length < 3 || !hasDrawnThisTurn || gameEnded}
+          disabled={
+            !isPlayerTurn ||
+            selectedIndices.length < 3 ||
+            !hasDrawnThisTurn ||
+            gameEnded
+          }
         >
           <img
             onClick={animateClick}
@@ -40,13 +47,24 @@ const GameFooter = ({
             style={{
               transform: `scale(${scale})`,
               transition: "transform 0.3s ease-in-out",
-              opacity: (!isPlayerTurn || selectedIndices.length < 3 || !hasDrawnThisTurn || gameEnded) ? 0.5 : 1
+              opacity:
+                !isPlayerTurn ||
+                selectedIndices.length < 3 ||
+                !hasDrawnThisTurn ||
+                gameEnded
+                  ? 0.5
+                  : 1,
             }}
           />
         </button>
         <button
           onClick={onDiscard}
-          disabled={!isPlayerTurn || selectedIndices.length !== 1 || !hasDrawnThisTurn || gameEnded}
+          disabled={
+            !isPlayerTurn ||
+            selectedIndices.length !== 1 ||
+            !hasDrawnThisTurn ||
+            gameEnded
+          }
         >
           <img
             onClick={animateClick}
@@ -56,13 +74,25 @@ const GameFooter = ({
             style={{
               transform: `scale(${scale})`,
               transition: "transform 0.3s ease-in-out",
-              opacity: (!isPlayerTurn || selectedIndices.length !== 1 || !hasDrawnThisTurn || gameEnded) ? 0.5 : 1
+              opacity:
+                !isPlayerTurn ||
+                selectedIndices.length !== 1 ||
+                !hasDrawnThisTurn ||
+                gameEnded
+                  ? 0.5
+                  : 1,
             }}
           />
         </button>
         <button
           onClick={onSapaw}
-          disabled={!isPlayerTurn || !selectedSapawTarget || selectedIndices.length === 0 || !hasDrawnThisTurn || gameEnded}
+          disabled={
+            !isPlayerTurn ||
+            !selectedSapawTarget ||
+            selectedIndices.length === 0 ||
+            !hasDrawnThisTurn ||
+            gameEnded
+          }
         >
           <img
             onClick={animateClick}
@@ -72,7 +102,14 @@ const GameFooter = ({
             style={{
               transform: `scale(${scale})`,
               transition: "transform 0.3s ease-in-out",
-              opacity: (!isPlayerTurn || !selectedSapawTarget || selectedIndices.length === 0 || !hasDrawnThisTurn || gameEnded) ? 0.5 : 1
+              opacity:
+                !isPlayerTurn ||
+                !selectedSapawTarget ||
+                selectedIndices.length === 0 ||
+                !hasDrawnThisTurn ||
+                gameEnded
+                  ? 0.5
+                  : 1,
             }}
           />
         </button>
@@ -104,9 +141,11 @@ const GameFooter = ({
             style={{
               transform: `scale(${scale})`,
               transition: "transform 0.3s ease-in-out",
-              opacity: (!isPlayerTurn || !hasDrawnThisTurn || gameEnded) ? 0.5 : 1
+              opacity:
+                !isPlayerTurn || !hasDrawnThisTurn || gameEnded ? 0.5 : 1,
             }}
           />
+          <DeclareWar />
         </button>
         {/* <button
           onClick={onChallenge}
@@ -134,7 +173,7 @@ const GameFooter = ({
             className="w-32 h-32"
             style={{
               transform: `scale(${scale})`,
-              transition: "transform 0.3s ease-in-out"
+              transition: "transform 0.3s ease-in-out",
             }}
           />
         </button>
@@ -146,7 +185,7 @@ const GameFooter = ({
             className="w-32 h-32"
             style={{
               transform: `scale(${scale})`,
-              transition: "transform 0.3s ease-in-out"
+              transition: "transform 0.3s ease-in-out",
             }}
           />
         </button>
@@ -158,7 +197,7 @@ const GameFooter = ({
             className="w-36 h-32"
             style={{
               transform: `scale(${scale})`,
-              transition: "transform 0.3s ease-in-out"
+              transition: "transform 0.3s ease-in-out",
             }}
           />
         </button>
@@ -170,7 +209,7 @@ const GameFooter = ({
             className="w-36 h-32"
             style={{
               transform: `scale(${scale})`,
-              transition: "transform 0.3s ease-in-out"
+              transition: "transform 0.3s ease-in-out",
             }}
           />
         </button>

@@ -17,6 +17,32 @@ function PlayerIcon({ playerIndex, players, positioning, currentPlayerPOV }) {
       ? "https://miro.medium.com/v2/resize:fit:1400/1*rKl56ixsC55cMAsO2aQhGQ@2x.jpeg"
       : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVCTEOejHb2Cc4W8KxhLqz8_o5K2rO3XrfpA&s";
 
+  // const getPlayerIconPositioning = (relativeIndex) => {
+  //   switch (relativeIndex) {
+  //     case 0:
+  //       return "hidden";
+  //     case 1:
+  //       return "top-36 right-14";
+  //     case 2:
+  //       return "top-36  left-14";
+  //     default:
+  //       return "";
+  //   }
+  // };
+
+  // const getMiniCardPosition = (relativeIndex) => {
+  //   switch (relativeIndex) {
+  //     case 0:
+  //       return "hidden";
+  //     case 1:
+  //       return "top-36 right-14";
+  //     case 2:
+  //       return "top-36  left-14";
+  //     default:
+  //       return "";
+  //   }
+  // }
+
   return (
     <motion.div
       className={`text-2xl absolute ${positioning}`}
@@ -24,57 +50,68 @@ function PlayerIcon({ playerIndex, players, positioning, currentPlayerPOV }) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="backdrop-blur-md bg-black/30 border border-white/10 text-white p-4 rounded-xl shadow-2xl max-w-xs w-full hover:bg-black/40 transition-all duration-300">
-        <div className="flex items-center space-x-4">
+      <div className="">
+        <div className="flex flex-col items-center">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-full blur-sm"></div>
             <img
               src={imageUrl || "/placeholder.svg?height=64&width=64"}
               alt={`Player ${playerIndex + 1}`}
-              className="relative w-16 h-16 rounded-full object-cover border-2 border-white/20"
+              className="relative w-28 h-28 rounded-full object-cover border-2 border-white/20"
               style={{
                 transition: "transform 0.3s ease-in-out",
               }}
             />
-            {players[playerIndex].consecutiveWins > 0 && (
-              <div className="absolute -bottom-2 -left-1 text-white text-xs font-bold px-2 py-1 rounded-full   w-full">
+            <div className="absolute inset-0 rounded-full border-4 border-lime-500"></div>
+            <div
+              className={`absolute ${playerIndex === 0 && "-right-3"} ${
+                playerIndex === 2 && "right-20"
+              } -bottom-2 w-12 h-14 bg-gradient-to-b from-[#5ECA00] via-[#5ECA00] via-33% to-[#489A00] border-white border-2 flex items-center justify-center rounded-lg drop-shadow-[3px_4px_0px_white]`}
+            >
+              <div className="relative">
                 <Image
-                  src="/image/winnerCrown.svg"
+                  src="/image/wcc-logo.svg"
+                  width={100}
+                  height={100}
+                  alt="Winner Crown"
+                  className="w-full h-full relative"
+                />
+
+                <div className="absolute inset-0 flex items-center justify-center ">
+                  <h1 className="font-black text-3xl text-[#FFD653] drop-shadow-[2px_4px_0px_#9B7600]">
+                    {players[playerIndex]?.hand?.length || 0}
+                  </h1>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex-col flex items-center">
+            <h2 className="font-black text-3xl text-white my-2 drop-shadow-[2px_3px_0px_black]">
+              {playerIndex}
+            </h2>
+            {/* PLAYER BALANCE */}
+            <div className="bg-[rgba(0,0,0,0.2)] flex flex-row items-center gap-2 py-2 rounded-full px-10">
+              <Image
+                src="/image/potbadge.svg"
+                width={50}
+                height={50}
+                alt="Winner Crown"
+                className="w-8 h-8"
+              />
+              <h2 className="font-black text-xl text-[#FFD653] drop-shadow-[2px_3px_0px_black]">
+                {players[playerIndex].points || 0}
+              </h2>
+            </div>
+            {players[playerIndex].consecutiveWins > 0 && (
+              <div className="flex flex-row gap-2 mt-2 items-center">
+                <Image
+                  src="/image/trophy.svg"
                   width={50}
                   height={50}
                   alt="Winner Crown"
-                  className="w-6 h-6"
+                  className="w-10 h-10"
                 />
               </div>
             )}
-          </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              {players[playerIndex].name}
-            </h2>
-            <p className="text-sm text-gray-300">
-              {`Player ${playerIndex + 1}`}
-            </p>
-          </div>
-        </div>
-        <div className="mt-4 flex justify-between items-center border-t border-white/10 pt-3">
-          <div>
-            <p className="text-sm text-gray-400">Pot Money</p>
-            <p className="text-lg font-bold text-emerald-400">
-              ₱ {players[playerIndex].points || 0}
-            </p>
-          </div>
-          <div className="w-8 2xl:w-24 h-8 2xl:h-28  bg-no-repeat bg-cover bg-center rounded-lg shadow-md flex items-center justify-center">
-            <p className="text-white text-stroke-thin font-extrabold text-2xl font-jaro absolute">
-              {players[playerIndex]?.hand?.length || 0}
-            </p>
-            <Image
-              src="/image/cardBackground.svg"
-              width={50}
-              height={50}
-              alt="Winner Crown"
-              className="w-12 h-12"
-            />
           </div>
         </div>
       </div>

@@ -14,7 +14,21 @@ export function MeldedCards({
   currentPlayerIndex,
   selectedSapawTarget,
 }) {
-  const rankOrder = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  const rankOrder = [
+    "A",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "J",
+    "Q",
+    "K",
+  ];
 
   const sortCardsByRank = (cards) => {
     return cards.sort((a, b) => {
@@ -31,11 +45,11 @@ export function MeldedCards({
   // SAPAW Action: Apply SAPAW by adjusting card ranks and sorting after
   const applySapaw = (melds, sapawCard) => {
     if (!melds || !sapawCard) return melds;
-    
-    const newMelds = melds.map(meld => {
+
+    const newMelds = melds.map((meld) => {
       if (!meld) return [];
       // Find the card to apply SAPAW action
-      const sapawIndex = meld.findIndex(card => card.rank === sapawCard.rank);
+      const sapawIndex = meld.findIndex((card) => card.rank === sapawCard.rank);
       if (sapawIndex !== -1) {
         const newMeld = [...meld];
         newMeld[sapawIndex] = { ...meld[sapawIndex], rank: sapawCard.rank };
@@ -50,7 +64,7 @@ export function MeldedCards({
 
   // Determine the current player's index based on socket.id
   const currentPlayerPOV = useMemo(() => {
-    return players.findIndex(player => player.id === socket);
+    return players.findIndex((player) => player.id === socket);
   }, [players, socket]);
 
   // Function to calculate relative player index
@@ -62,14 +76,23 @@ export function MeldedCards({
   const getPositioningClass = (relativeIndex) => {
     switch (relativeIndex) {
       case 0:
-        return "bottom-64 left-96 right-96 -translate-x-1/2 z-10";
+        return "top-96 left-80";
       case 1:
-        return "top-44 2xl:top-72 right-64 2xl:right-96 z-10";
+        return "top-36 right-60";
       case 2:
-        return "top-44 2xl:top-72 left-72 2xl:left-96 z-10 pl-3";
       default:
-        return "";
+        return "top-36 left-60";
     }
+    // switch (relativeIndex) {
+    //   case 0:
+    //     return "bottom-64 left-96 right-96 -translate-x-1/2 z-10";
+    //   case 1:
+    //     return "top-44 2xl:top-72 right-64 2xl:right-96 z-10";
+    //   case 2:
+    //     return "top-44 2xl:top-72 left-72 2xl:left-96 z-10 pl-3";
+    //   default:
+    //     return "";
+    // }
   };
 
   // Function to get PlayerIcon positioning
@@ -78,24 +101,24 @@ export function MeldedCards({
       case 0:
         return "hidden";
       case 1:
-        return "top-36 right-14 2xl:right-32 z-20";
+        return "top-36 right-14";
       case 2:
-        return "top-36 2xl:top-48 left-14 2xl:left-32 z-20";
+        return "top-36  left-14";
       default:
         return "";
     }
   };
 
   return (
-    <div className="fixed inset-0 pointer-events-none" key={socket}>
+    <div className="fixed inset-0 pointer-events-none " key={socket}>
       {players.map((player, absoluteIndex) => {
         const relativeIndex = getRelativePlayerIndex(absoluteIndex);
-        const sortedMelds = selectedSapawTarget 
-          ? applySapaw(player.exposedMelds, selectedSapawTarget) 
+        const sortedMelds = selectedSapawTarget
+          ? applySapaw(player.exposedMelds, selectedSapawTarget)
           : sortMelds(player.exposedMelds);
-        
+
         const isCurrentPlayer = absoluteIndex === currentPlayerIndex;
-        
+
         return (
           <div key={player.id}>
             <PlayerIcon
@@ -110,7 +133,11 @@ export function MeldedCards({
               ${getPositioningClass(relativeIndex)}
             `}
             >
-              <div className={`bg-opacity-0 bg-white ${relativeIndex === 0 ? "w-[1000px] flex justify-start" : ""} rounded-lg`}>
+              <div
+                className={`bg-opacity-0 bg-white ${
+                  relativeIndex === 0 ? "w-[1000px] flex justify-start" : ""
+                } rounded-lg`}
+              >
                 <AnimatePresence>
                   {sortedMelds?.map((meld, meldIndex) => (
                     <motion.div
@@ -130,12 +157,14 @@ export function MeldedCards({
                       className={`rounded-lg first-line: ${
                         selectedSapawTarget?.playerIndex === absoluteIndex &&
                         selectedSapawTarget?.meldIndex === meldIndex
-                          ? "bg-black bg-opacity-30 flex h-auto justify-start"
-                          : "flex justify-start h-auto"
+                          ? "flex h-auto justify-start"
+                          : "flex justify-start h-auto "
                       }`}
-                      onClick={() => onSapawSelect({ playerIndex: absoluteIndex, meldIndex })}
+                      onClick={() =>
+                        onSapawSelect({ playerIndex: absoluteIndex, meldIndex })
+                      }
                     >
-                      <div className="flex flex-row flex-wrap">
+                      <div className="flex flex-row flex-wrap border">
                         {meld?.map((card, cardIndex) => (
                           <motion.div
                             key={cardIndex}
@@ -168,4 +197,3 @@ export function MeldedCards({
     </div>
   );
 }
-

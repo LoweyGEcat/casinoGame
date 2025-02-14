@@ -3,11 +3,13 @@ import React, { useState } from "react";
 import NetworkStatus from "@/app/components/NetworkStatus";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 function GameBet() {
-  const [bet, setBet] = useState();
+  // const [bet, setBet] = useState();
   const router = useRouter();
-  const handleButtonClickLive = () => {
+  const [activeTab, setActiveTab] = useState("REGULAR"); // State to manage active tab
+  const handleButtonClickLive = (bet) => {
     router.push(`/TongitsGame/live-game/multiplayer?betAmount=${bet}`);
   };
   const [activeIndex, setActiveIndex] = useState(null);
@@ -22,209 +24,1051 @@ function GameBet() {
 
   return (
     <div className="w-full h-screen bg-gradient-to-b from-[#080E81] to-[#254F64]">
-      <button onClick={exitGamebet}>
-        <Image
-          src="/image/existButton.svg"
-          alt="My image"
-          width={50}
-          height={50}
-          className="w-full h-full"
-          style={{
-            transition: "transform 0.3s ease-in-out",
-          }}
-        />
-      </button>
-      {/* <div className="absolute w-screen h-16 top-0 bg-user-name">
-        <div className="w-full h-auto flex justify-center items-center">
-          <div className="flex flex-col">
-            <div className="flex justify-between flex-row items-center px-24 w-screen">
-              <div>
-                <Image
-                  src="/image/vipGamebet.svg"
-                  alt="My image"
-                  width={200}
-                  height={256}
-                  className="w-auto h-64"
-                  style={{
-                    transition: "transform 0.3s ease-in-out",
-                  }}
-                />
-              </div>
-              <div>
-                <Image
-                  src="/image/gamebetCrown.svg"
-                  alt="My image"
-                  width={200}
-                  height={256}
-                  className="w-auto h-auto slow-high-bounce"
-                  style={{
-                    transition: "transform 0.3s ease-in-out",
-                  }}
-                />
-              </div>
-              <div>
-                <Image
-                  src="/image/gameberRegular.svg"
-                  alt="My image"
-                  width={200}
-                  height={224}
-                  className="w-auto h-56"
-                  style={{
-                    transition: "transform 0.3s ease-in-out",
-                  }}
-                />
-              </div>
-            </div>
-            <div className="flex justify-between flex-row px-24 gap-10 w-screen">
-              <div>
-                <button
-                  onClick={() => {
-                    handleClick(0);
-                    setBet(100000);
-                  }}
-                >
-                  <Image
-                    src="/image/gamebet100.svg"
-                    alt="My image"
-                    width={200}
-                    height={224}
-                    className={`w-auto h-56 transition-transform ease-in-out duration-300 ${
-                      activeIndex === 0
-                        ? "transform translate-y-[-10px] scale-110"
-                        : ""
-                    }`}
-                  />
-                </button>
-                <button
-                  onClick={() => {
-                    handleClick(1);
-                    setBet(50000);
-                  }}
-                >
-                  <Image
-                    src="/image/gamebet50.svg"
-                    alt="My image"
-                    width={200}
-                    height={224}
-                    className={`w-auto h-56 transition-transform ease-in-out duration-300 ${
-                      activeIndex === 1
-                        ? "transform translate-y-[-10px] scale-110"
-                        : ""
-                    }`}
-                  />
-                </button>
-                <button
-                  onClick={() => {
-                    handleClick(2);
-                    setBet(20000);
-                  }}
-                >
-                  <Image
-                    src="/image/gamebet20.svg"
-                    alt="My image"
-                    width={200}
-                    height={224}
-                    className={`w-auto h-56 transition-transform ease-in-out duration-300 ${
-                      activeIndex === 2
-                        ? "transform translate-y-[-10px] scale-110"
-                        : ""
-                    }`}
-                  />
-                </button>
-              </div>
-              <div>
-                <button
-                  onClick={() => {
-                    handleClick(3);
-                    setBet(2000);
-                  }}
-                >
-                  <Image
-                    src="/image/gamebet2.svg"
-                    alt="My image"
-                    width={200}
-                    height={224}
-                    className={`w-auto h-56 transition-transform ease-in-out duration-300 ${
-                      activeIndex === 3
-                        ? "transform translate-y-[-10px] scale-110"
-                        : ""
-                    }`}
-                  />
-                </button>
-                <button
-                  onClick={() => {
-                    handleClick(4);
-                    setBet(5000);
-                  }}
-                >
-                  <Image
-                    src="/image/gamebet5.svg"
-                    alt="My image"
-                    width={200}
-                    height={224}
-                    className={`w-auto h-56 transition-transform ease-in-out duration-300 ${
-                      activeIndex === 4
-                        ? "transform translate-y-[-10px] scale-110"
-                        : ""
-                    }`}
-                  />
-                </button>
-                <button
-                  onClick={() => {
-                    handleClick(5);
-                    setBet(10000);
-                  }}
-                >
-                  <Image
-                    src="/image/gamebet10.svg"
-                    alt="My image"
-                    width={200}
-                    height={224}
-                    className={`w-auto h-56 transition-transform ease-in-out duration-300 ${
-                      activeIndex === 5
-                        ? "transform translate-y-[-10px] scale-110"
-                        : ""
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-            <div className="w-full flex items-center justify-center py-16">
-              <button onClick={handleButtonClickLive}>
-                <Image
-                  src="/image/gamebetQuickplay.svg"
-                  alt="My image"
-                  width={208}
-                  height={104}
-                  className="w-52 h-auto"
-                  style={{
-                    transition: "transform 0.3s ease-in-out",
-                  }}
-                />
+      <div className="w-full h-10 mb-8">
+        {/* <div className="grid grid-cols-3 gap-5">
+          <div className="bg-white">
+          </div>
+          <div className="bg-white ">01</div>
+          <div className="bg-white">01</div>
+        </div> */}
+        <button onClick={exitGamebet} className="absolute top-4 left-4">
+          <Image
+            src="/image/existButton.svg"
+            alt="My image"
+            width={50}
+            height={50}
+            className="w-full h-full"
+            style={{
+              transition: "transform 0.3s ease-in-out",
+            }}
+          />
+        </button>
+      </div>
+
+      <div className="flex flex-col items-center mx-auto">
+        <div className="grid grid-cols-3 w-11/12 mb-3">
+          <div className="flex items-center border-l border-[#f7e479] border-t rounded-lg left_tabs">
+            <div className="w-full flex items-center justify-start gap-5 p-3">
+              <button
+                type="button"
+                className={`btn ${activeTab === "REGULAR" ? "active" : ""}`}
+                onClick={() => setActiveTab("REGULAR")}
+              >
+                <strong className="font-bold text-xl">REGULAR</strong>
+                <div id="container-stars">
+                  <div id="stars"></div>
+                </div>
+
+                <div id="glow">
+                  <div className="circle "></div>
+                  <div className="circle "></div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className={`btn ${activeTab === "VIP" ? "active" : ""}`}
+                onClick={() => setActiveTab("VIP")}
+              >
+                <strong className="font-bold text-xl">VIP</strong>
+                <div id="container-stars">
+                  <div id="stars"></div>
+                </div>
+
+                <div id="glow">
+                  <div className="circle "></div>
+                  <div className="circle "></div>
+                </div>
               </button>
             </div>
           </div>
+          <div className="flex items-center justify-center">
+            <div className="relative w-full flex items-center justify-center">
+              <Image
+                src="/image/gamebetCrown.svg"
+                alt="My image"
+                width={100}
+                height={100}
+                className="animate-bounce absolute "
+              />
+              <div className="loader"></div>
+            </div>
+          </div>
+
+          <div className="border-r border-[#f7e479] border-t rounded-lg tabs_container"></div>
         </div>
-      </div> */}
-      <div
-        className="w-full h-40 aspect-w-16 aspect-h-9  bg-black
-     sm:aspect-w-4 sm:aspect-h-3 
-     md:aspect-w-16 md:aspect-h-9
-     landscape:aspect-w-21 landscape:aspect-h-9 
-     portrait:aspect-w-4 portrait:aspect-h-3"
-      >
-        <a
-          href="#"
-          class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
-        >
-          <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Noteworthy technology acquisitions 2021
-          </h5>
-          <p class="font-normal text-gray-700 dark:text-gray-400">
-            Here are the biggest enterprise technology acquisitions of 2021 so
-            far, in reverse chronological order.
-          </p>
-        </a>
+        <div className="p-16 main_container w-11/12  h-auto border-[#f7e479] border-t-2 border-b-2 flex items-center justify-center">
+          <AnimatePresence mode="wait" initial={false}>
+            {activeTab === "VIP" ? (
+              <>
+                {/* VIP Category */}
+                <motion.section
+                  key="vip"
+                  initial={{ opacity: 0, rotateY: 90, scale: 0.5 }} // Start with rotation and scale
+                  animate={{ opacity: 1, rotateY: 0, scale: 1 }} // Animate to normal state
+                  exit={{ opacity: 0, rotateY: -90, scale: 0.5 }} // Exit with rotation and scale
+                  transition={{ duration: 0.5 }}
+                >
+                  <section className="">
+                    <div className="grid grid-cols-2 gap-8">
+                      {/* VIP Category */}
+                      <div className="...">
+                        <div className="flex flex-row gap-4 items-center">
+                          {/* Card 1 */}
+                          <div className="card transform skew-x-[5deg] ">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#CCCCCC] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#CCCCCC] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+
+                                  {/* AMOUNT TO BET */}
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    100,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(100000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 2 */}
+                          <div className="card transform skew-x-[5deg] ">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#BFBA16] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#BFBA16] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+
+                                  {/* AMOUNT TO BET */}
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    50,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center  flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(50000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 3 */}
+                          <div className="card  transform skew-x-[5deg] ">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#1B94A9] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#1B94A9] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    20,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center  flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(20000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Regular Category */}
+                      <div className="...">
+                        <div className="flex flex-row gap-4 items-center">
+                          {/* Card 1 */}
+                          <div className="card  transform skew-x-[-5deg] ">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#93259D] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#93259D] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg " />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+
+                                  {/* AMOUNT TO BET */}
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    5,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center  flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(5000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 2 */}
+                          <div className="card  transform skew-x-[-5deg]">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#B88142] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#B88142] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+                                  {/* AMOUNT TO BET */}
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    10,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center  flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(10000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 3 */}
+                          <div className="card  transform skew-x-[-5deg]">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#A61212] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#A61212] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+                                  {/* AMOUNT TO BET */}
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    15,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center  flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(15000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </motion.section>
+              </>
+            ) : (
+              <>
+                <motion.section
+                  key="regular"
+                  initial={{ opacity: 0, rotateY: 90, scale: 0.5 }} // Start with rotation and scale
+                  animate={{ opacity: 1, rotateY: 0, scale: 1 }} // Animate to normal state
+                  exit={{ opacity: 0, rotateY: -90, scale: 0.5 }} // Exit with rotation and scale
+                  transition={{ duration: 0.5 }}
+                >
+                  <section className="">
+                    <div className="grid grid-cols-2 gap-8">
+                      {/* VIP Category */}
+                      <div className="...">
+                        <div className="flex flex-row gap-4 items-center">
+                          {/* Card 1 */}
+                          <div className="card transform skew-x-[5deg] ">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#CCCCCC] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#CCCCCC] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+
+                                  {/* AMOUNT TO BET */}
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    100,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(100000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 2 */}
+                          <div className="card transform skew-x-[5deg] ">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#BFBA16] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#BFBA16] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+
+                                  {/* AMOUNT TO BET */}
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    50,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center  flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(50000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 3 */}
+                          <div className="card  transform skew-x-[5deg] ">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#1B94A9] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#1B94A9] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    20,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center  flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(20000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Regular Category */}
+                      <div className="...">
+                        <div className="flex flex-row gap-4 items-center">
+                          {/* Card 1 */}
+                          <div className="card  transform skew-x-[-5deg] ">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#93259D] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#93259D] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg " />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+
+                                  {/* AMOUNT TO BET */}
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    5,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center  flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(5000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 2 */}
+                          <div className="card  transform skew-x-[-5deg]">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#B88142] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#B88142] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+                                  {/* AMOUNT TO BET */}
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    10,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center  flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(10000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 3 */}
+                          <div className="card  transform skew-x-[-5deg]">
+                            <div className="content">
+                              <div className="back">
+                                <div className="back-content bg-gradient-to-b from-[#A61212] to-[#737373]">
+                                  <div className="shadow-lg rounded-full w-32 h-32 relative mt-5 bg-gradient-to-b from-[#A61212] to-[#737373]">
+                                    <div className="absolute -top-2 -left-5">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start my-2 border-2 rounded-lg" />
+                                    </div>
+                                    <div className="coin absolute inset-0">
+                                      <div className="side heads">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                      <div className="side tails">
+                                        <Image
+                                          src="/image/gamebetCrown.svg"
+                                          alt="My image"
+                                          width={200}
+                                          height={256}
+                                          className="w-auto h-auto "
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-32 left-24">
+                                      <hr className="w-10 text-start justify-start items-start border-2 rounded-lg" />
+                                      <hr className="w-12 text-start justify-start items-start mt-2 border-2 rounded-lg" />
+                                    </div>
+                                  </div>
+                                  {/* AMOUNT TO BET */}
+                                  <h1 className="font-black text-4xl text-[#FADD00] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.5)] [-webkit-text-stroke:1px_black]">
+                                    15,000
+                                  </h1>
+                                </div>
+                              </div>
+                              <div className="front">
+                                <div className="img">
+                                  <div className="circle "></div>
+                                  <div className="circle " id="right"></div>
+                                  <div className="circle " id="bottom"></div>
+                                </div>
+
+                                <div className="front-content">
+                                  <small className="badge">Regular</small>
+                                  <div className="items-center justify-center  flex">
+                                    <button
+                                      type="button"
+                                      className="btn"
+                                      onClick={() =>
+                                        handleButtonClickLive(15000)
+                                      }
+                                    >
+                                      <strong className="font-bold text-xl">
+                                        Play Now
+                                      </strong>
+                                      <div id="container-stars">
+                                        <div id="stars"></div>
+                                      </div>
+
+                                      <div id="glow">
+                                        <div className="circle "></div>
+                                        <div className="circle "></div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </motion.section>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

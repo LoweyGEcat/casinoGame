@@ -25,6 +25,7 @@ import CircularCountdown from "@/app/components/CircularCountdown";
 import ActionText from "@/app/components/ActionText";
 import FightModal from "@/app/components/FightChallengeModal";
 import ChallengeModal from "@/app/components/ChanllengeModal";
+import DeclareWar from "@/app/components/declare-fight";
 
 const Game = () => {
   const [gameState, setGameState] = useState(null);
@@ -110,16 +111,20 @@ const Game = () => {
       }
     });
 
-    newSocket.on('fight-initiated', (data) => {
+    newSocket.on("fight-initiated", (data) => {
       setFightInitiator(data.initiator);
       setIsFightModalOpen(true);
     });
 
-    newSocket.on('fight-response-received', (data) => {
-      setCurrentAction(`${data.responder} has ${data.accepted ? 'accepted' : 'declined'} the fight.`);
+    newSocket.on("fight-response-received", (data) => {
+      setCurrentAction(
+        `${data.responder} has ${
+          data.accepted ? "accepted" : "declined"
+        } the fight.`
+      );
     });
 
-    newSocket.on('fight-resolved', (data) => {
+    newSocket.on("fight-resolved", (data) => {
       setIsFightModalOpen(false);
       if (data.winner) {
         setCurrentAction(`${data.winner} won the fight!`);
@@ -128,13 +133,13 @@ const Game = () => {
       }
     });
 
-    newSocket.on('challenge-initiated', (data) => {
+    newSocket.on("challenge-initiated", (data) => {
       setChallengeInitiator(data.initiator);
       setChallengeTarget(data.target);
       setIsChallengeModalOpen(true);
     });
 
-    newSocket.on('challenge-resolved', (data) => {
+    newSocket.on("challenge-resolved", (data) => {
       setIsChallengeModalOpen(false);
       setCurrentAction(`${data.winner} won the challenge!`);
     });
@@ -150,7 +155,7 @@ const Game = () => {
 
     if (!socket) return;
     // create game-reset
-    socket.on('game-reset', ({ newGameId, message }) => {
+    socket.on("game-reset", ({ newGameId, message }) => {
       // Reset all game state except playersCount
       setGameState(null);
       setIsWaiting(true);
@@ -166,23 +171,23 @@ const Game = () => {
       setIsDiscardPileOpen(false);
       setIsScoreboardVisible(false);
       setTimer(40); // Reset timer
-  
+
       // Re-join with the same player name
       if (playerName) {
-        socket.emit('join-game', playerName);
+        socket.emit("join-game", playerName);
       }
     });
-  
+
     return () => {
-      socket.off('game-reset');
-      socket.off('game-started');
-      socket.off('game-state');
-      socket.off('timer-update');
-      socket.off('player-joined');
-      socket.off('player-disconnected');
-      socket.off('fight-initiated');
-      socket.off('fight-response-received');
-      socket.off('fight-resolved');
+      socket.off("game-reset");
+      socket.off("game-started");
+      socket.off("game-state");
+      socket.off("timer-update");
+      socket.off("player-joined");
+      socket.off("player-disconnected");
+      socket.off("fight-initiated");
+      socket.off("fight-response-received");
+      socket.off("fight-resolved");
     };
   }, []);
 
@@ -191,7 +196,7 @@ const Game = () => {
       gameState &&
       gameState.currentPlayerIndex ===
         gameState.players.findIndex((p) => p.id === socket?.id);
-  
+
     if (isPlayerTurn && !gameState?.gameEnded) {
       if (!timerRef.current) {
         timerRef.current = setInterval(() => {
@@ -214,7 +219,7 @@ const Game = () => {
       }
       setTimerExpired(false);
     }
-  
+
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -296,7 +301,10 @@ const Game = () => {
           socket.emit("player-action", { type: "fight" });
           setIsFightModalOpen(true);
         } else if (action.type === "challenge") {
-          socket.emit("player-action", { type: "challenge", targetIndex: action.targetIndex });
+          socket.emit("player-action", {
+            type: "challenge",
+            targetIndex: action.targetIndex,
+          });
         } else {
           socket.emit("player-action", action);
         }
@@ -307,14 +315,14 @@ const Game = () => {
 
   const handleFightResponse = (accept) => {
     if (gameState && socket) {
-      socket.emit('player-action', { type: 'fight-response', accept });
+      socket.emit("player-action", { type: "fight-response", accept });
     }
     setIsFightModalOpen(false);
   };
 
   const handleChallengeResponse = (accept) => {
     if (gameState && socket) {
-      socket.emit('player-action', { type: 'challenge-response', accept });
+      socket.emit("player-action", { type: "challenge-response", accept });
     }
     setIsChallengeModalOpen(false);
   };
@@ -325,7 +333,7 @@ const Game = () => {
       const topDiscardCard =
         gameState.discardPile[gameState.discardPile.length - 1];
       const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-  
+
       for (let i = 0; i < currentPlayer?.hand.length; i++) {
         for (let j = i + 1; j < currentPlayer?.hand.length; j++) {
           if (
@@ -339,18 +347,18 @@ const Game = () => {
           }
         }
       }
-  
+
       for (const meld of currentPlayer?.exposedMelds) {
         if (isValidMeld([...meld, topDiscardCard])) {
           return true;
         }
       }
-  
+
       return false;
     } catch (error) {
       router.push("/TongitsGame/Gamebet");
     }
-  }, [gameState,router]);
+  }, [gameState, router]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleChat = () => setIsChatOpen(!isChatOpen);
@@ -423,7 +431,7 @@ const Game = () => {
   };
 
   const resetGame = () => {
-    socket.emit('player-action', { type: 'resetGame' });
+    socket.emit("player-action", { type: "resetGame" });
     router.push(`/TongitsGame/Gamebet`);
     setTimeout(() => {
       window.location.reload();
@@ -445,30 +453,31 @@ const Game = () => {
     setIsChallengeModalOpen(false);
     setIsDiscardPileOpen(false);
     setIsScoreboardVisible(false);
-    setTimer(40)
+    setTimer(40);
     setGameState(null);
-    setIsFightModalOpen(false)
-    setIsChallengeModalOpen(false)
-    setIsDiscardPileOpen(false)
-    setChallengeTarget(null)
-    setPlayersCount(0)
-    // ITO LANG MUNA APPROACH KO FOR NOW RESET NEXT GAME ENCOUNTER ERROR 
+    setIsFightModalOpen(false);
+    setIsChallengeModalOpen(false);
+    setIsDiscardPileOpen(false);
+    setChallengeTarget(null);
+    setPlayersCount(0);
+    // ITO LANG MUNA APPROACH KO FOR NOW RESET NEXT GAME ENCOUNTER ERROR
     // IF WALA REFRESH NAIIWAN UNG MGA DATA KAHIT NAG RESET NA
     const value = searchParams.get("betAmount");
     router.push(`/TongitsGame/live-game/multiplayer?betAmount=20000`);
     window.location.reload();
-    socket.emit('player-action', { type: 'resetGame' });
+    socket.emit("player-action", { type: "resetGame" });
   };
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+
   const playerIndex = gameState.players.findIndex((p) => p.id === socket.id);
   const player = gameState.players[playerIndex];
-  console.log(gameState);
+  console.log(gameState.lastAction?.type);
+  console.log(gameState, "ano laman mo");
   const isPlayerTurn =
     gameState.currentPlayerIndex ===
     gameState.players.findIndex((p) => p.id === socket.id);
 
-    
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/TableBot.svg')] bg-no-repeat bg-cover bg-center relative">
       <div className="absolute w-screen h-16 top-0 bg-custom-gradient">
@@ -691,19 +700,23 @@ const Game = () => {
           }
         }}
         onFight={() => {
-          if (isPlayerTurn && !gameState.gameEnded && gameState.hasDrawnThisTurn) {
-            handleAction({ type: 'fight' });
+          if (
+            isPlayerTurn &&
+            !gameState.gameEnded &&
+            gameState.hasDrawnThisTurn
+          ) {
+            handleAction({ type: "fight" });
           }
         }}
         onChallenge={() => {
           if (isPlayerTurn && !gameState.gameEnded) {
             // Open a modal to select which player to challenge
             // For simplicity, we'll just challenge the next player
-            const targetIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
-            handleAction({ type: 'challenge', targetIndex });
+            const targetIndex =
+              (gameState.currentPlayerIndex + 1) % gameState.players.length;
+            handleAction({ type: "challenge", targetIndex });
           }
         }}
-
         isPlayerTurn={isPlayerTurn}
         gameEnded={gameState.gameEnded}
         hasDrawnThisTurn={gameState.hasDrawnThisTurn}
@@ -723,7 +736,13 @@ const Game = () => {
         />
       )}
 
-      <ChatSideBar  isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} socket={socket} gameId={gameState.id} playerIndex={playerIndex} />
+      <ChatSideBar
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        socket={socket}
+        gameId={gameState.id}
+        playerIndex={playerIndex}
+      />
       {currentAction && <ActionText action={currentAction} />}
 
       <FightModal
@@ -744,9 +763,9 @@ const Game = () => {
         target={challengeTarget}
       />
 
+      <DeclareWar gamestate={gameState} socketId={socket.id} />
     </div>
   );
 };
 
 export default Game;
-
