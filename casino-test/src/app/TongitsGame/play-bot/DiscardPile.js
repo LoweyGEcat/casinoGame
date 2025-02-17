@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from "react";
 import { Player } from "../../../hooks/use-tongit-game";
 import { Card as CardType } from "../../../utils/card-utils";
@@ -23,13 +22,11 @@ export function DiscardPile({
     }
   }, [setPosition]);
 
-
-
   if (!topCard) {
     return (
       <button
-      ref={posRef}
-        className=" w-1.5 2xl:w-20 h-24 2xl:h-28 bg-gray-300 border border-black rounded-lg shadow-md flex items-center justify-center"
+        ref={posRef}
+        className="w-16 h-20 bg-white drop-shadow-[0px_8px_0px_#044412] rounded-lg items-center flex justify-center"
         disabled={true}
       >
         Empty
@@ -38,10 +35,9 @@ export function DiscardPile({
   }
 
   return (
-    <div
-    >
+    <div>
       <button
-      ref={posRef}  
+        ref={posRef}
         className={`p-0 bg-transparent hover:bg-transparent  ${
           !canDraw || !currentPlayer ? "opacity-50 cursor-not-allowed" : ""
         }`}
@@ -50,7 +46,9 @@ export function DiscardPile({
       >
         {canDraw && currentPlayer && <Arrow />}
         <Card
-          cardSize={"w-1.5 2xl:w-20 h-24 2xl:h-28 p-1 text-5xl 2xl:text-2xl p-3"}
+          cardSize={
+            "w-16 h-20  p-1 text-2xl drop-shadow-[5px_8px_0px_#044412] border-4 rounded-lg"
+          }
           card={topCard}
         />
       </button>

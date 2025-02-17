@@ -1,8 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Timer from "./PlayerIconsTimer";
 
-function PlayerIcon({ playerIndex, players, positioning, currentPlayerPOV }) {
+function PlayerIcon({
+  playerIndex,
+  players,
+  positioning,
+  currentPlayerPOV,
+  ownPlayerIndex,
+  currentPlayerIndex,
+  timer,
+}) {
   // Calculate the relative index based on the current player's POV
   const relativeIndex = React.useMemo(() => {
     const currentPlayerIndex = players.findIndex(
@@ -17,31 +26,26 @@ function PlayerIcon({ playerIndex, players, positioning, currentPlayerPOV }) {
       ? "https://miro.medium.com/v2/resize:fit:1400/1*rKl56ixsC55cMAsO2aQhGQ@2x.jpeg"
       : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVCTEOejHb2Cc4W8KxhLqz8_o5K2rO3XrfpA&s";
 
-  // const getPlayerIconPositioning = (relativeIndex) => {
-  //   switch (relativeIndex) {
-  //     case 0:
-  //       return "hidden";
-  //     case 1:
-  //       return "top-36 right-14";
-  //     case 2:
-  //       return "top-36  left-14";
-  //     default:
-  //       return "";
-  //   }
-  // };
+  const showTimer = React.useMemo(() => {
+    const conditions = [
+      { own: 0, target: 2 },
+      { own: 0, target: 1 },
+      { own: 1, target: 0 },
+      { own: 1, target: 2 },
+      { own: 2, target: 1 },
+      { own: 2, target: 0 },
+    ];
+    return conditions.some(
+      (cond) =>
+        cond.own === ownPlayerIndex &&
+        cond.target === playerIndex &&
+        playerIndex === currentPlayerIndex
+    );
+  }, [ownPlayerIndex, playerIndex, currentPlayerIndex]);
 
-  // const getMiniCardPosition = (relativeIndex) => {
-  //   switch (relativeIndex) {
-  //     case 0:
-  //       return "hidden";
-  //     case 1:
-  //       return "top-36 right-14";
-  //     case 2:
-  //       return "top-36  left-14";
-  //     default:
-  //       return "";
-  //   }
-  // }
+  useEffect(() => {
+    console.log(currentPlayerIndex);
+  });
 
   return (
     <motion.div
@@ -61,10 +65,18 @@ function PlayerIcon({ playerIndex, players, positioning, currentPlayerPOV }) {
                 transition: "transform 0.3s ease-in-out",
               }}
             />
-            <div className="absolute inset-0 rounded-full border-4 border-lime-500"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-lime-500">
+              {showTimer && <Timer timer={timer} />}
+            </div>
             <div
-              className={`absolute ${playerIndex === 0 && "-right-3"} ${
-                playerIndex === 2 && "right-20"
+              className={`absolute ${
+                ownPlayerIndex === 1 && playerIndex === 2 && "right-20"
+              } ${ownPlayerIndex === 1 && playerIndex === 0 && "-right-2"} ${
+                ownPlayerIndex === 0 && playerIndex === 2 && "-right-2"
+              } ${ownPlayerIndex === 0 && playerIndex === 1 && "right-20"} ${
+                ownPlayerIndex === 2 && playerIndex === 1 && "-right-2"
+              } ${
+                ownPlayerIndex === 2 && playerIndex === 0 && "right-20"
               } -bottom-2 w-12 h-14 bg-gradient-to-b from-[#5ECA00] via-[#5ECA00] via-33% to-[#489A00] border-white border-2 flex items-center justify-center rounded-lg drop-shadow-[3px_4px_0px_white]`}
             >
               <div className="relative">

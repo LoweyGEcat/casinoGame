@@ -13,6 +13,8 @@ export function MeldedCards({
   onSapawSelect,
   currentPlayerIndex,
   selectedSapawTarget,
+  ownPlayerIndex,
+  timer,
 }) {
   const rankOrder = [
     "A",
@@ -83,16 +85,6 @@ export function MeldedCards({
       default:
         return "top-36 left-60";
     }
-    // switch (relativeIndex) {
-    //   case 0:
-    //     return "bottom-64 left-96 right-96 -translate-x-1/2 z-10";
-    //   case 1:
-    //     return "top-44 2xl:top-72 right-64 2xl:right-96 z-10";
-    //   case 2:
-    //     return "top-44 2xl:top-72 left-72 2xl:left-96 z-10 pl-3";
-    //   default:
-    //     return "";
-    // }
   };
 
   // Function to get PlayerIcon positioning
@@ -126,6 +118,9 @@ export function MeldedCards({
               players={players}
               positioning={getPlayerIconPositioning(relativeIndex)}
               currentPlayerPOV={socket?.id}
+              ownPlayerIndex={ownPlayerIndex}
+              currentPlayerIndex={currentPlayerIndex}
+              timer={timer}
             />
             <div
               className={`
@@ -164,7 +159,7 @@ export function MeldedCards({
                         onSapawSelect({ playerIndex: absoluteIndex, meldIndex })
                       }
                     >
-                      <div className="flex flex-row flex-wrap border">
+                      <div className="flex flex-row flex-wrap border w-96 rounded-lg p-2">
                         {meld?.map((card, cardIndex) => (
                           <motion.div
                             key={cardIndex}
@@ -180,7 +175,7 @@ export function MeldedCards({
                               contextText={contextText}
                               border={`1px solid black`}
                               transformCard={`perspective(500px) rotateX(40deg)`}
-                              cardSize={"w-14 h-auto p-1 text-xl 2xl:text-lg"}
+                              cardSize={"w-14 h-auto p-1 text-2xl"}
                               card={card}
                             />
                           </motion.div>
