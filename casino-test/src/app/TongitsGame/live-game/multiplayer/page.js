@@ -699,7 +699,7 @@ const Game = () => {
             </div>
 
             <div className="flex flex-col w-60 items-center">
-              <h1 className="font-black text-4xl text-center bg-gradient-to-r from-[#5EFF80] to-[#11CB39] text-transparent bg-clip-text drop-shadow-[2px_7px_2px_#044412]">
+              <h1 className="font-black text-4xl text-center bg-gradient-to-r from-[#5EFF80] to-[#11CB39] text-transparent bg-clip-text drop-shadow-[2px_7px_2px_#044412] tracking-widest">
                 Tong'iT TradisyonaL
               </h1>
               <div className="rounded-md flex justify-center relative bg-[rgba(0,0,0,0.2)] gap-2 mt-5 p-5 px-10">
@@ -904,43 +904,19 @@ const Game = () => {
         </div>
       </main>
 
-      <div className="absolute right-24 bottom-0 w-40 h-28 flex flex-row items-center gap-4">
-        <div className="rounded-full  flex items-center justify-center">
-          <div className="faq-button bg-gradient-to-t to-[#F0E53B] from-[#FFC300] ">
-            <div className="flex items-center justify-center">
-              <h1 className="font-bold text-3xl mb-1">🙂</h1>
-            </div>
-            <div className="tooltip gap-1">
-              <button className=" bg-white  rounded-full p-2 px-3">👍</button>
-              <button className=" bg-white  rounded-full p-2 px-3">👏🏻</button>
-              <button className=" bg-white rounded-full p-2 px-3">🎉</button>
-              <button className=" bg-white  rounded-full p-2 px-3">✨</button>
-              <button className=" bg-white  rounded-full p-2 px-3">🙂</button>
-            </div>
-          </div>
-        </div>
-        <button
-          className="chatBtn bg-gradient-to-t to-[#6BFF69] from-[#04E700]"
-          onClick={toggleChat}
-        >
-          <svg
-            onClick={animateClick}
-            className="w-14 h-9"
-            xmlns="http://www.w3.org/2000/svg"
-            height="1.6em"
-            fill="white"
-            viewBox="0 0 1000 1000"
-            version="1.1"
-          >
-            <path d="M881.1,720.5H434.7L173.3,941V720.5h-54.4C58.8,720.5,10,671.1,10,610.2v-441C10,108.4,58.8,59,118.9,59h762.2C941.2,59,990,108.4,990,169.3v441C990,671.1,941.2,720.5,881.1,720.5L881.1,720.5z M935.6,169.3c0-30.4-24.4-55.2-54.5-55.2H118.9c-30.1,0-54.5,24.7-54.5,55.2v441c0,30.4,24.4,55.1,54.5,55.1h54.4h54.4v110.3l163.3-110.2H500h381.1c30.1,0,54.5-24.7,54.5-55.1V169.3L935.6,169.3z M717.8,444.8c-30.1,0-54.4-24.7-54.4-55.1c0-30.4,24.3-55.2,54.4-55.2c30.1,0,54.5,24.7,54.5,55.2C772.2,420.2,747.8,444.8,717.8,444.8L717.8,444.8z M500,444.8c-30.1,0-54.4-24.7-54.4-55.1c0-30.4,24.3-55.2,54.4-55.2c30.1,0,54.4,24.7,54.4,55.2C554.4,420.2,530.1,444.8,500,444.8L500,444.8z M282.2,444.8c-30.1,0-54.5-24.7-54.5-55.1c0-30.4,24.4-55.2,54.5-55.2c30.1,0,54.4,24.7,54.4,55.2C336.7,420.2,312.3,444.8,282.2,444.8L282.2,444.8z"></path>
-          </svg>
-        </button>
-      </div>
+      <div className="absolute right-24 bottom-0 w-40 h-28 flex flex-row items-center gap-4"></div>
 
       <div className="absolute left-28 bottom-5">
         <div className="flex flex-col items-center ">
           <div className="bg-white rounded-full h-28 w-28 flex flex-col items-center relative">
-            <div className="absolute inset-0 rounded-full border-4 border-lime-500"></div>
+            <CircularCountdown
+              timer={timer}
+              gameState={gameState}
+              isPlayerTurn={isPlayerTurn}
+            />
+
+            {/* if player is talking this will be activated */}
+            {/* <div className="absolute inset-0 rounded-full border-4 border-lime-500"></div> */}
           </div>
           {/* PLAYER NAME */}
           <h1 className="font-black text-xl text-white my-2 drop-shadow-[2px_3px_0px_black]">
@@ -959,19 +935,6 @@ const Game = () => {
               2,000
             </h2>
           </div>
-        </div>
-      </div>
-
-      <div className="absolute left-5 bottom-56">
-        {/* <GameRound gameState={gameState} /> */}
-        <div
-          className={`absolute top-16 left-1/2 transform -translate-x-1/2  w-14 h-14 flex justify-center items-center p-2`}
-        >
-          <CircularCountdown
-            timer={timer}
-            gameState={gameState}
-            isPlayerTurn={isPlayerTurn}
-          />
         </div>
       </div>
 
@@ -1046,8 +1009,50 @@ const Game = () => {
       />
 
       {socket && gameState && (
-        <div className="absolute bottom-0 right-0">
-          <AudioControls roomId={gameState.id} socket={socket} />
+        <div className="absolute bottom-0 right-0 p-4 gamefooter w-80 ">
+          <div className="flex flex-row gap-3 items-center justify-end">
+            <div className="rounded-full  flex items-center justify-center">
+              <div className="faq-button bg-gradient-to-t to-[#F0E53B] from-[#FFC300] ">
+                <div className="flex items-center justify-center">
+                  <h1 className="font-bold text-3xl mb-1">🙂</h1>
+                </div>
+                <div className="tooltip gap-1">
+                  <button className=" bg-white  rounded-full p-2 px-3">
+                    👍
+                  </button>
+                  <button className=" bg-white  rounded-full p-2 px-3">
+                    👏🏻
+                  </button>
+                  <button className=" bg-white rounded-full p-2 px-3">
+                    🎉
+                  </button>
+                  <button className=" bg-white  rounded-full p-2 px-3">
+                    ✨
+                  </button>
+                  <button className=" bg-white  rounded-full p-2 px-3">
+                    🙂
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button
+              className="chatBtn bg-gradient-to-t to-[#6BFF69] from-[#04E700]"
+              onClick={toggleChat}
+            >
+              <svg
+                onClick={animateClick}
+                className="w-14 h-9"
+                xmlns="http://www.w3.org/2000/svg"
+                height="1.6em"
+                fill="white"
+                viewBox="0 0 1000 1000"
+                version="1.1"
+              >
+                <path d="M881.1,720.5H434.7L173.3,941V720.5h-54.4C58.8,720.5,10,671.1,10,610.2v-441C10,108.4,58.8,59,118.9,59h762.2C941.2,59,990,108.4,990,169.3v441C990,671.1,941.2,720.5,881.1,720.5L881.1,720.5z M935.6,169.3c0-30.4-24.4-55.2-54.5-55.2H118.9c-30.1,0-54.5,24.7-54.5,55.2v441c0,30.4,24.4,55.1,54.5,55.1h54.4h54.4v110.3l163.3-110.2H500h381.1c30.1,0,54.5-24.7,54.5-55.1V169.3L935.6,169.3z M717.8,444.8c-30.1,0-54.4-24.7-54.4-55.1c0-30.4,24.3-55.2,54.4-55.2c30.1,0,54.5,24.7,54.5,55.2C772.2,420.2,747.8,444.8,717.8,444.8L717.8,444.8z M500,444.8c-30.1,0-54.4-24.7-54.4-55.1c0-30.4,24.3-55.2,54.4-55.2c30.1,0,54.4,24.7,54.4,55.2C554.4,420.2,530.1,444.8,500,444.8L500,444.8z M282.2,444.8c-30.1,0-54.5-24.7-54.5-55.1c0-30.4,24.4-55.2,54.5-55.2c30.1,0,54.4,24.7,54.4,55.2C336.7,420.2,312.3,444.8,282.2,444.8L282.2,444.8z"></path>
+              </svg>
+            </button>
+            <AudioControls roomId={gameState.id} socket={socket} />
+          </div>
         </div>
       )}
     </div>

@@ -65,7 +65,7 @@ function PlayerIcon({
                 transition: "transform 0.3s ease-in-out",
               }}
             />
-            <div className="absolute inset-0 rounded-full border-4 border-lime-500">
+            <div className="absolute inset-0 rounded-full border-4 border-lime-500 ">
               {showTimer && <Timer timer={timer} />}
             </div>
             <div

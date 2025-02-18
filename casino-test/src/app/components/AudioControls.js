@@ -119,7 +119,7 @@ const AudioControls = ({ roomId, socket }) => {
   };
 
   return (
-    <div className="flex justify-center items-center p-4">
+    <div className="flex justify-center items-center">
       <input
         type="checkbox"
         id="checkbox"

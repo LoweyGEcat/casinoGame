@@ -26,7 +26,7 @@ export function DiscardPile({
     return (
       <button
         ref={posRef}
-        className="w-16 h-20 bg-white drop-shadow-[0px_8px_0px_#044412] rounded-lg items-center flex justify-center"
+        className="w-16 h-20 bg-slate-200 drop-shadow-[3px_5px_0px_#9D9D9D] rounded-lg items-center flex justify-center"
         disabled={true}
       >
         Empty

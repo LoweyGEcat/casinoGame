@@ -7,7 +7,7 @@ const Timer = ({ timer }) => {
   const strokeDashoffset = circleLength - (circleLength * timer) / totalTime; // Calculate offset based on timer
 
   return (
-    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
       <svg
         className="w-32 h-32" // Increased width and height
         width="120" // Size of the container to fit the full circle
