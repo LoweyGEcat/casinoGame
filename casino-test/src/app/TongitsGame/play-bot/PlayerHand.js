@@ -104,13 +104,13 @@ export function PlayerHand({
           />
         </motion.div>
       ))}
-      {isCurrentPlayer && (
+      {/* {isCurrentPlayer && (
         <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
           <div className="bg-green-500 text-white px-4 py-2 rounded-full shadow-lg animate-pulse">
             Your Turn!
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

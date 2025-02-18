@@ -26,7 +26,7 @@ export function DiscardPile({
     return (
       <button
         ref={posRef}
-        className="w-16 h-20 bg-slate-200 drop-shadow-[3px_5px_0px_#9D9D9D] rounded-lg items-center flex justify-center"
+        className="w-16 h-20 bg-white drop-shadow-[3px_5px_0px_#9D9D9D] rounded-lg items-center flex justify-center"
         disabled={true}
       >
         Empty
@@ -47,7 +47,7 @@ export function DiscardPile({
         {canDraw && currentPlayer && <Arrow />}
         <Card
           cardSize={
-            "w-16 h-20  p-1 text-2xl drop-shadow-[5px_8px_0px_#044412] border-4 rounded-lg"
+            "w-16 h-20  p-1 text-2xl drop-shadow-[3px_5px_0px_#9D9D9D] border-4 rounded-lg"
           }
           card={topCard}
         />

@@ -33,7 +33,7 @@ const GameFooter = ({
   };
 
   return (
-    <div className="px-16  flex w-screen items-center pt-7 h-32 absolute bottom-40 left-0 justify-center">
+    <div className="flex w-screen items-center pt-7 h-32 absolute bottom-40 left-0 justify-center">
       <div className="flex flex-row items-center gap-3">
         <button
           onClick={onMeld}
@@ -168,7 +168,7 @@ const GameFooter = ({
           />
         </div>
       </div>
-      <div className="h-full flex gap-1 justify-center items-center">
+      <div className="h-full flex gap-1 justify-center items-center ">
         {/* <button onClick={onAutoSort}>
           <img
             onClick={animateClick}
