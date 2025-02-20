@@ -5,7 +5,7 @@ export function Deck({ cardsLeft, onDraw, disabled }) {
     <div>
       {!disabled && <Arrow />}
       <button onClick={onDraw} disabled={disabled}>
-        <div className="relative w-16 h-20 bg-gradient-to-b from-[#5ECA00] via-[#5ECA00] via-33% to-[#489A00] drop-shadow-[3px_5px_0px_#9D9D9D] border-4 rounded-lg">
+        <div className="relative w-16 h-20 bg-gradient-to-b from-[#5ECA00] via-[#5ECA00] via-33% to-[#489A00] drop-shadow-[3px_5px_0px_#9D9D9D] border-4 rounded-lg ">
           <img
             src="/image/wcc_logo_bunot.svg"
             width={150}

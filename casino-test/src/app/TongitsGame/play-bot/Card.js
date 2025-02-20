@@ -60,7 +60,7 @@ export function Card({
         return "";
     }
   };
-  const baseClasses = `${opacityCard} bg-white border border-gray-300 rounded-md shadow-sm flex flex-col justify-between cursor-pointer ${color} `;
+  const baseClasses = `${opacityCard} bg-gradient-to-b from-[#FAFAFA] to-[#BBBBBB] rounded-xl shadow-sm flex flex-col justify-between cursor-pointer ${color} drop-shadow-[-2px_3px_0px_#4B4B4B]`;
 
   // Make the card bigger by adjusting width, height, and padding
   const sizeClasses = small

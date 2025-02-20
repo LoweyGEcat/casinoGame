@@ -66,9 +66,8 @@ export function PlayerHand({
   return (
     <div
       ref={containerRef}
-      className="flex justify-center items-end absolute bottom-5 w-full"
+      className="flex flex-row justify-center items-end absolute bottom-5 w-full"
     >
-      {/* <div className="absolute bottom- left-1/2 transform -translate-x-1/2 bg-white w-32 h-32 rounded-full"></div> */}
       {hand?.map((card, index) => (
         <motion.div
           key={`${card.suit}-${card.rank}-${index}`}
@@ -76,7 +75,7 @@ export function PlayerHand({
           initial={false}
           animate={{
             y: selectedIndices.includes(index) ? -16 : 0,
-            x: (index - (hand.length - 1) / 2) * 45, // Keeps cards centered
+            x: (index - (hand.length - 1) / 2) * (45 + 10), // Keeps cards centered
           }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
           whileHover={{ rotate: 5 }}
@@ -90,7 +89,7 @@ export function PlayerHand({
         >
           <Card
             contextText={contextText}
-            border={"1px solid black"}
+            border={"2px solid white"}
             position={position}
             opacityCard={`${
               selectedCards.size === 0 || selectedCards.has(index)

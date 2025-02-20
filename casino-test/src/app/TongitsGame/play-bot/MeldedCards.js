@@ -159,7 +159,25 @@ export function MeldedCards({
                         onSapawSelect({ playerIndex: absoluteIndex, meldIndex })
                       }
                     >
-                      <div className="flex flex-row flex-wrap border w-96 rounded-lg p-2">
+                      <div
+                        className={`flex flex-row flex-wrap border w-auto rounded-lg p-2
+                        ${
+                          ownPlayerIndex === 1 &&
+                          absoluteIndex === 2 &&
+                          "justify-end"
+                        }
+                        ${
+                          ownPlayerIndex === 0 &&
+                          absoluteIndex === 1 &&
+                          "justify-end"
+                        }
+                        ${
+                          ownPlayerIndex === 2 &&
+                          absoluteIndex === 0 &&
+                          "justify-end"
+                        }
+                        `}
+                      >
                         {meld?.map((card, cardIndex) => (
                           <motion.div
                             key={cardIndex}

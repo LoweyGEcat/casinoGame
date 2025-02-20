@@ -586,7 +586,7 @@ const Game = () => {
 
   if (gameStarted && !isDealingDone) {
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/TableBot.svg')] bg-no-repeat bg-cover bg-center relative">
+      <div className="flex flex-col items-center justify-center w-full min-h-screen bg-[url('/image/tablegame2.svg')] bg-no-repeat bg-cover bg-center relative">
         <DealingAnimation onComplete={() => setIsDealingDone(true)} />
       </div>
     );
@@ -644,6 +644,7 @@ const Game = () => {
     gameState.currentPlayerIndex ===
     gameState.players.findIndex((p) => p.id === socket.id);
 
+  console.log(player);
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen bg-[url('/image/tablegame2.svg')] bg-no-repeat bg-cover bg-center relative overflow-hidden">
       <header className="absolute top-0 flex flex-row justify-between w-full">
@@ -702,7 +703,7 @@ const Game = () => {
               <h1 className="font-black text-4xl text-center bg-gradient-to-r from-[#5EFF80] to-[#11CB39] text-transparent bg-clip-text drop-shadow-[2px_7px_2px_#044412] tracking-widest">
                 Tong'iT TradisyonaL
               </h1>
-              <div className="rounded-md flex justify-center relative bg-[rgba(0,0,0,0.2)] gap-2 mt-5 p-5 px-10">
+              <div className="rounded-md flex justify-center relative bg-[rgba(0,0,0,0.4)] gap-2 mt-5 p-5 px-10">
                 <Deck
                   cardsLeft={gameState.deck.length}
                   onDraw={() =>
@@ -766,6 +767,7 @@ const Game = () => {
                   discardCard={gameState.discardPile}
                   isOpen={isDiscardPileOpen}
                   onClose={() => setIsDiscardPileOpen(false)}
+                  TextContent={"Card Dump"}
                 />
                 <button
                   className="absolute -right-3 top-12 text-white text-xl"
@@ -902,7 +904,7 @@ const Game = () => {
           </div>
           {/* PLAYER NAME */}
           <h1 className="font-black text-xl text-white my-2 drop-shadow-[2px_3px_0px_black]">
-            Jeorge Pakaw
+            {player.name}
           </h1>
           {/* PLAYER BALANCE */}
           <div className="bg-[rgba(0,0,0,0.2)] flex flex-row items-center gap-2 py-2 rounded-full px-10">
@@ -971,7 +973,6 @@ const Game = () => {
         playerIndex={playerIndex}
       />
       {currentAction && <ActionText action={currentAction} />}
-
       <FightModal
         isOpen={isFightModalOpen}
         onClose={() => setIsFightModalOpen(false)}
@@ -981,14 +982,14 @@ const Game = () => {
         currentPlayer={player?.name}
       />
 
-      <ChallengeModal
+      {/* <ChallengeModal
         isOpen={isChallengeModalOpen}
         onClose={() => setIsChallengeModalOpen(false)}
         onAccept={() => handleChallengeResponse(true)}
         onDecline={() => handleChallengeResponse(false)}
         initiator={challengeInitiator}
         target={challengeTarget}
-      />
+      /> */}
 
       {socket && gameState && (
         <div className="absolute bottom-0 right-0">
@@ -1052,7 +1053,7 @@ const Game = () => {
                     <div className="flex items-center justify-center">
                       <h1 className="font-bold text-3xl mb-1">🙂</h1>
                     </div>
-                    <div className="tooltip gap-1">
+                    {/* <div className="tooltip gap-1">
                       <button className=" bg-white  rounded-full p-2 px-3">
                         👍
                       </button>
@@ -1068,7 +1069,7 @@ const Game = () => {
                       <button className=" bg-white  rounded-full p-2 px-3">
                         🙂
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
                 <button

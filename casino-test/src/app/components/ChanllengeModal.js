@@ -1,7 +1,15 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-const ChallengeModal = ({ isOpen, onClose, onAccept, onDecline, initiator, target }) => {
+const ChallengeModal = ({
+  isOpen,
+  onClose,
+  onAccept,
+  onDecline,
+  initiator,
+  target,
+}) => {
+  console.log("Challenge Modal");
   return (
     <AnimatePresence>
       {isOpen && (
@@ -19,9 +27,15 @@ const ChallengeModal = ({ isOpen, onClose, onAccept, onDecline, initiator, targe
           >
             <h2 className="text-2xl font-bold mb-4">Challenge!</h2>
             {target ? (
-              <p className="mb-4">{initiator} has challenged {target}. Do you accept the challenge?</p>
+              <p className="mb-4">
+                {initiator} has challenged {target}. Do you accept the
+                challenge?
+              </p>
             ) : (
-              <p className="mb-4">{initiator} has initiated a challenge. Do you want to participate?</p>
+              <p className="mb-4">
+                {initiator} has initiated a challenge. Do you want to
+                participate?
+              </p>
             )}
             <div className="flex justify-end space-x-4">
               <button
